@@ -1,0 +1,47 @@
+<Solution>
+  <Folder Name="/Samples/">
+    <Project Path="src/Samples/Capabilities.Core/Capabilities.Core.fsproj" />
+    <Project Path="src/Samples/Capabilities/Capabilities.csproj" />
+    <Project Path="src/Samples/EventBindingsAndBehaviors.Core/EventBindingsAndBehaviors.Core.fsproj" />
+    <Project Path="src/Samples/EventBindingsAndBehaviors/EventBindingsAndBehaviors.csproj" />
+    <Project Path="src/Samples/FileDialogs.Core/FileDialogs.Core.fsproj" />
+    <Project Path="src/Samples/FileDialogs/FileDialogs.csproj" />
+    <Project Path="src/Samples/FileDialogsCmdMsg.Core/FileDialogsCmdMsg.Core.fsproj" />
+    <Project Path="src/Samples/FileDialogsCmdMsg/FileDialogsCmdMsg.csproj" />
+    <Project Path="src/Samples/Multiselect.Core/Multiselect.Core.fsproj" />
+    <Project Path="src/Samples/Multiselect/Multiselect.csproj" />
+    <Project Path="src/Samples/NewWindow.Core/NewWindow.Core.fsproj" />
+    <Project Path="src/Samples/NewWindow/NewWindow.csproj" />
+    <Project Path="src/Samples/OneWaySeq.Core/OneWaySeq.Core.fsproj" />
+    <Project Path="src/Samples/OneWaySeq/OneWaySeq.csproj" />
+    <Project Path="src/Samples/SingleCounter.Core/SingleCounter.Core.fsproj" />
+    <Project Path="src/Samples/SingleCounter/SingleCounter.csproj" />
+    <Project Path="src/Samples/Sticky.Core/Sticky.Core.fsproj" />
+    <Project Path="src/Samples/Sticky/Sticky.csproj" />
+    <Project Path="src/Samples/SubModel.Core/SubModel.Core.fsproj" />
+    <Project Path="src/Samples/SubModel/SubModel.csproj" />
+    <Project Path="src/Samples/SubModelOpt.Core/SubModelOpt.Core.fsproj" />
+    <Project Path="src/Samples/SubModelOpt/SubModelOpt.csproj" />
+    <Project Path="src/Samples/SubModelSelectedItem.Core/SubModelSelectedItem.Core.fsproj" />
+    <Project Path="src/Samples/SubModelSelectedItem/SubModelSelectedItem.csproj" />
+    <Project Path="src/Samples/SubModelSeq.Core/SubModelSeq.Core.fsproj" />
+    <Project Path="src/Samples/SubModelSeq/SubModelSeq.csproj" />
+    <Project Path="src/Samples/SubModelStatic.Core/SubModelStatic.Core.fsproj" />
+    <Project Path="src/Samples/SubModelStatic/SubModelStatic.csproj" />
+    <Project Path="src/Samples/Threading.Core/Threading.Core.fsproj" />
+    <Project Path="src/Samples/Threading/Threading.csproj" />
+    <Project Path="src/Samples/UiBoundCmdParam.Core/UiBoundCmdParam.Core.fsproj" />
+    <Project Path="src/Samples/UiBoundCmdParam/UiBoundCmdParam.csproj" />
+    <Project Path="src/Samples/Validation.Core/Validation.Core.fsproj" />
+    <Project Path="src/Samples/Validation/Validation.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+    <File Path="REFERENCE.md" />
+    <File Path="RELEASE_NOTES.md" />
+    <File Path="TUTORIAL.md" />
+  </Folder>
+  <Project Path="src/Elmish.WPF.Benchmarks/Elmish.WPF.Benchmarks.fsproj" />
+  <Project Path="src/Elmish.WPF.Tests/Elmish.WPF.Tests.fsproj" />
+  <Project Path="src/Elmish.WPF/Elmish.WPF.fsproj" />
+</Solution>
