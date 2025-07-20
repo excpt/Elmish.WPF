@@ -293,7 +293,7 @@ module BindingData =
     /// <param name="b">The binding to box.</param>
     /// <returns>A binding with boxed type parameter.</returns>
     let boxT b = MapT.recursiveCase box unbox b
-    
+
     /// <summary>
     /// Unboxes the type parameter of a binding.
     /// </summary>
@@ -481,7 +481,7 @@ module BindingData =
     /// <param name="f">Function that produces the message from the model.</param>
     /// <returns>A function that sets the binding's message based on the model.</returns>
     let setMsgWithModel f = mapMsgWithModel (fun _ m -> f m)
-    
+
     /// <summary>
     /// Sets the message of a binding to a constant value.
     /// </summary>
