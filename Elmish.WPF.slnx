@@ -40,6 +40,9 @@
     <File Path="REFERENCE.md" />
     <File Path="RELEASE_NOTES.md" />
     <File Path="TUTORIAL.md" />
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="LICENSE.md" />
   </Folder>
   <Project Path="src/Elmish.WPF.Benchmarks/Elmish.WPF.Benchmarks.fsproj" />
   <Project Path="src/Elmish.WPF.Tests/Elmish.WPF.Tests.fsproj" />
