@@ -8,7 +8,12 @@ open Microsoft.Extensions.Logging
 
 open BindingVmHelpers
 
+/// <summary>
 /// Represents all necessary data used to create a binding.
+/// </summary>
+/// <typeparam name="'model">The type of the model</typeparam>
+/// <typeparam name="'msg">The type of messages</typeparam>
+/// <typeparam name="'t">The type of the binding value</typeparam>
 type Binding<'model, 'msg, 't> =
     internal
         { Name: string
@@ -30,9 +35,16 @@ module internal Helpers =
         member this.CompareBindings() : Binding<'model, 'msg> -> Binding<'model, 'msg> -> int =
             fun a b -> this.Recursive(a.Data) - this.Recursive(b.Data)
 
+/// <summary>
+/// Interface for view models that can be updated with new model states
+/// </summary>
+/// <typeparam name="'model">The type of the model</typeparam>
+/// <typeparam name="'msg">The type of messages</typeparam>
 [<AllowNullLiteral>]
 type IViewModel<'model, 'msg> =
+    /// <summary>Gets the current model state</summary>
     abstract member CurrentModel: 'model
+    /// <summary>Updates the view model with a new model state</summary>
     abstract member UpdateModel: 'model -> unit
 
 module internal IViewModel =
@@ -136,6 +148,12 @@ module internal ViewModelHelper =
 
                 None
 
+/// <summary>
+/// Dynamic view model that uses DynamicObject to expose bindings as properties.
+/// This is the primary view model implementation for dynamic binding scenarios.
+/// </summary>
+/// <typeparam name="'model">The type of the model</typeparam>
+/// <typeparam name="'msg">The type of messages</typeparam>
 [<AllowNullLiteral>]
 type internal DynamicViewModel<'model, 'msg>(args: ViewModelArgs<'model, 'msg>, bindings: Binding<'model, 'msg> list) as this
     =
@@ -309,6 +327,12 @@ type internal DynamicViewModel<'model, 'msg>(args: ViewModelArgs<'model, 'msg>, 
 
 open System.Runtime.CompilerServices
 
+/// <summary>
+/// Base class for strongly-typed view models that provides Get and Set helper methods
+/// for accessing bindings in a type-safe manner.
+/// </summary>
+/// <typeparam name="'model">The type of the model</typeparam>
+/// <typeparam name="'msg">The type of messages</typeparam>
 [<AllowNullLiteral>]
 type ViewModelBase<'model, 'msg>(args: ViewModelArgs<'model, 'msg>) as this =
 
@@ -331,6 +355,12 @@ type ViewModelBase<'model, 'msg>(args: ViewModelArgs<'model, 'msg>) as this =
         )
             .Recursive(initialModel, dispatch, (fun () -> this |> IViewModel.currentModel), binding.Data)
 
+    /// <summary>
+    /// Gets a binding value using the caller member name as the binding name
+    /// </summary>
+    /// <typeparam name="'a">The type of the binding value</typeparam>
+    /// <param name="memberName">Automatically captured member name</param>
+    /// <returns>Function that takes a binding factory and returns the value</returns>
     member _.Get<'a>([<CallerMemberName>] ?memberName: string) =
         fun (binding: string -> Binding<'model, 'msg, 'a>) ->
             let result =
@@ -398,6 +428,13 @@ type ViewModelBase<'model, 'msg>(args: ViewModelArgs<'model, 'msg>) as this =
                 failwithf $"[%s{nameChain}] Get FAILED: Binding {memberName} returned an error {e}"
             | Some(Ok r) -> r
 
+    /// <summary>
+    /// Sets a binding value using the caller member name as the binding name
+    /// </summary>
+    /// <typeparam name="'a">The type of the binding value</typeparam>
+    /// <param name="value">The value to set</param>
+    /// <param name="memberName">Automatically captured member name</param>
+    /// <returns>Function that takes a binding factory</returns>
     member _.Set<'a>(value: 'a, [<CallerMemberName>] ?memberName: string) =
         fun (binding: string -> Binding<'model, 'msg, 'a>) ->
             try

@@ -6,6 +6,12 @@ open Microsoft.Extensions.Logging.Abstractions
 open Elmish
 
 
+/// <summary>
+/// Represents a WPF program configuration that combines Elmish architecture with WPF data binding
+/// </summary>
+/// <typeparam name="'model">The type of the model</typeparam>
+/// <typeparam name="'msg">The type of messages</typeparam>
+/// <typeparam name="'viewModel">The type of the view model</typeparam>
 type WpfProgram<'model, 'msg, 'viewModel> =
     internal
         {
@@ -50,7 +56,13 @@ module WpfProgram =
           PerformanceLogThreshold = 1 }
 
 
+    /// <summary>
     /// Creates a WpfProgram that does not use commands.
+    /// </summary>
+    /// <param name="init">Function to initialize the model</param>
+    /// <param name="update">Function to update the model based on messages</param>
+    /// <param name="bindings">Function that returns the list of bindings</param>
+    /// <returns>A configured WpfProgram</returns>
     let mkSimple
         (init: unit -> 'model)
         (update: 'msg -> 'model -> 'model)
@@ -59,7 +71,13 @@ module WpfProgram =
         Program.mkSimple init update (fun _ _ -> ()) |> createWithBindings bindings
 
 
-    /// Creates a WpfProgram that uses commands
+    /// <summary>
+    /// Creates a WpfProgram that uses commands for side effects
+    /// </summary>
+    /// <param name="init">Function to initialize the model and commands</param>
+    /// <param name="update">Function to update the model and produce commands</param>
+    /// <param name="bindings">Function that returns the list of bindings</param>
+    /// <returns>A configured WpfProgram</returns>
     let mkProgram
         (init: unit -> 'model * Cmd<'msg>)
         (update: 'msg -> 'model -> 'model * Cmd<'msg>)
@@ -67,7 +85,13 @@ module WpfProgram =
         =
         Program.mkProgram init update (fun _ _ -> ()) |> createWithBindings bindings
 
-    /// Creates a WpfProgram that does not use commands.
+    /// <summary>
+    /// Creates a WpfProgram with a typed view model that does not use commands
+    /// </summary>
+    /// <param name="init">Function to initialize the model</param>
+    /// <param name="update">Function to update the model based on messages</param>
+    /// <param name="createVm">Function to create the typed view model</param>
+    /// <returns>A configured WpfProgram</returns>
     let mkSimpleT
         (init: unit -> 'model)
         (update: 'msg -> 'model -> 'model)
@@ -76,7 +100,13 @@ module WpfProgram =
         Program.mkSimple init update (fun _ _ -> ()) |> createWithVm createVm
 
 
-    /// Creates a WpfProgram that uses commands
+    /// <summary>
+    /// Creates a WpfProgram with a typed view model that uses commands
+    /// </summary>
+    /// <param name="init">Function to initialize the model and commands</param>
+    /// <param name="update">Function to update the model and produce commands</param>
+    /// <param name="createVm">Function to create the typed view model</param>
+    /// <returns>A configured WpfProgram</returns>
     let mkProgramT
         (init: unit -> 'model * Cmd<'msg>)
         (update: 'msg -> 'model -> 'model * Cmd<'msg>)
@@ -282,10 +312,15 @@ module WpfProgram =
             Application.Current.MainWindow <- window
 
 
+    /// <summary>
     /// Starts the Elmish and WPF dispatch loops. Will instantiate Application and set its
     /// MainWindow if it is not already running, and then run the specified window. This is a
     /// blocking function. If you are using App.xaml as an implicit entry point, see
     /// startElmishLoop.
+    /// </summary>
+    /// <param name="window">The main window to run</param>
+    /// <param name="program">The WpfProgram configuration</param>
+    /// <returns>The application run result</returns>
     let runWindow window program =
         (*
      * This is the correct order for these four statements.
@@ -302,12 +337,19 @@ module WpfProgram =
         Application.Current.Run window
 
 
+    /// <summary>
     /// Same as mkProgram, except that init and update don't return Cmd<'msg>
     /// directly, but instead return a CmdMsg discriminated union that is converted
     /// to Cmd<'msg> using toCmd. This means that the init and update functions
     /// return only data, and thus are easier to unit test. The CmdMsg pattern is
     /// general; this is just a trivial convenience function that automatically
     /// converts CmdMsg to Cmd<'msg> for you in init and update.
+    /// </summary>
+    /// <param name="init">Function to initialize model and command messages</param>
+    /// <param name="update">Function to update model and produce command messages</param>
+    /// <param name="bindings">Function that returns the list of bindings</param>
+    /// <param name="toCmd">Function to convert command messages to Cmd</param>
+    /// <returns>A configured WpfProgram</returns>
     let mkProgramWithCmdMsg
         (init: unit -> 'model * 'cmdMsg list)
         (update: 'msg -> 'model -> 'model * 'cmdMsg list)
@@ -338,53 +380,87 @@ module WpfProgram =
         mkProgramT (init >> convert) (fun msg model -> update msg model |> convert) createVm
 
 
-    /// Uses the specified ILoggerFactory for logging.
+    /// <summary>
+    /// Uses the specified ILoggerFactory for logging
+    /// </summary>
+    /// <param name="loggerFactory">The logger factory to use</param>
+    /// <param name="program">The program to configure</param>
+    /// <returns>Program with logging configured</returns>
     let withLogger loggerFactory program =
         { program with
             LoggerFactory = loggerFactory }
 
 
+    /// <summary>
     /// Calls the specified function for unhandled exceptions in the Elmish
     /// dispatch loop (e.g. in commands or the update function). This essentially
     /// delegates to Elmish's Program.withErrorHandler.
-    ///
     /// The first (string) argument of onError is a message from Elmish describing
     /// the context of the exception. Note that this may contain a rendered
     /// message case with all data ("%A" formatting).
-    ///
     /// Note that exceptions passed to onError are also logged to the logger
     /// specified using WpfProgram.withLogger.
+    /// </summary>
+    /// <param name="onError">Function to handle errors</param>
+    /// <param name="program">The program to configure</param>
+    /// <returns>Program with error handler configured</returns>
     let withElmishErrorHandler onError program = { program with ErrorHandler = onError }
 
 
+    /// <summary>
     /// Subscribe to external source of events, overrides existing subscription.
     /// Return the subscriptions that should be active based on the current model.
     /// Subscriptions will be started or stopped automatically to match.
+    /// </summary>
+    /// <param name="subscribe">Function that returns active subscriptions based on model</param>
+    /// <param name="program">The program to configure</param>
+    /// <returns>Program with subscription configured</returns>
     let withSubscription (subscribe: 'model -> Sub<'msg>) program =
         { program with
             ElmishProgram = program.ElmishProgram |> Program.withSubscription subscribe }
 
 
-    /// Map existing subscription to external source of events.
+    /// <summary>
+    /// Map existing subscription to external source of events
+    /// </summary>
+    /// <param name="map">Function to transform the subscription</param>
+    /// <param name="program">The program to configure</param>
+    /// <returns>Program with mapped subscription</returns>
     let mapSubscription map program =
         { program with
             ElmishProgram = program.ElmishProgram |> Program.mapSubscription map }
 
 
+    /// <summary>
     /// Only logs binding performance for calls taking longer than the specified number of
     /// milliseconds. The default is 1ms.
+    /// </summary>
+    /// <param name="threshold">Minimum milliseconds before logging performance</param>
+    /// <param name="program">The program to configure</param>
+    /// <returns>Program with performance threshold configured</returns>
     let withPerformanceLogThreshold threshold program =
         { program with
             PerformanceLogThreshold = threshold }
 
 
-    /// Exit criteria and the handler, overrides existing.
+    /// <summary>
+    /// Exit criteria and the handler, overrides existing
+    /// </summary>
+    /// <param name="predicate">Function to determine if program should terminate</param>
+    /// <param name="terminate">Function to handle termination</param>
+    /// <param name="program">The program to configure</param>
+    /// <returns>Program with termination configured</returns>
     let withTermination predicate terminate program =
         { program with
             ElmishProgram = program.ElmishProgram |> Program.withTermination predicate terminate }
 
 
-    /// Map existing criteria and the handler.
+    /// <summary>
+    /// Map existing termination criteria and handler
+    /// </summary>
+    /// <param name="map">Function to transform the termination configuration</param>
+    /// <param name="program">The program to configure</param>
+    /// <returns>Program with mapped termination</returns>
     let mapTermination map program =
         { program with
             ElmishProgram = program.ElmishProgram |> Program.mapTermination map }
@@ -393,7 +469,12 @@ module WpfProgram =
 [<RequireQualifiedAccess>]
 module Subscribe =
 
-    /// Converts an effect to a Subscribe with a given dispose (on stop) method.
+    /// <summary>
+    /// Converts an effect to a Subscribe with a given dispose (on stop) method
+    /// </summary>
+    /// <param name="dispose">Function to call when subscription is stopped</param>
+    /// <param name="effect">The effect to convert</param>
+    /// <returns>A subscription that can be managed by Elmish</returns>
     let ofEffect dispose (effect: Effect<'msg>) : Subscribe<'msg> =
         fun dispatch ->
             effect dispatch
@@ -404,8 +485,13 @@ module Subscribe =
 
 [<RequireQualifiedAccess>]
 module Sub =
+    /// <summary>
     /// Subscribe to an external source of events. The subscribe function is called once,
     /// with the initial model, but can dispatch messages at any time.
+    /// </summary>
+    /// <param name="idPrefix">Prefix for subscription IDs</param>
+    /// <param name="v3Subscription">Legacy v3 subscription function</param>
+    /// <returns>Function that creates subscriptions from model</returns>
     [<System.Obsolete("Migrate your v3 subscriptions to the new subscriptions with lifetimes and dispose")>]
     let fromV3Subscription (idPrefix: string) (v3Subscription: 'model -> Cmd<'msg>) : 'model -> Sub<'msg> =
         let mutable memoizedSub: Sub<'msg> voption = ValueNone

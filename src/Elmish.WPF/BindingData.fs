@@ -10,6 +10,14 @@ open Elmish
 
 module Helper =
 
+    /// <summary>
+    /// Maps dispatch function to handle binding messages by getting the current model,
+    /// applying a message transformation, and dispatching the result.
+    /// </summary>
+    /// <param name="getCurrentModel">Function to get the current model state.</param>
+    /// <param name="set">Function to transform binding message and model into a message.</param>
+    /// <param name="dispatch">The dispatch function to send messages.</param>
+    /// <returns>A function that takes a binding message and dispatches the transformed message.</returns>
     let mapDispatch
         (getCurrentModel: unit -> 'model)
         (set: 'bindingMsg -> 'model -> 'msg)
@@ -18,12 +26,21 @@ module Helper =
         fun bMsg -> getCurrentModel () |> set bMsg |> dispatch
 
 
+/// <summary>
+/// Represents a one-way binding that flows data from the model to the view.
+/// </summary>
 type OneWayData<'model, 'a> = { Get: 'model -> 'a }
 
 
+/// <summary>
+/// Represents a one-way binding that flows data from the view to the model.
+/// </summary>
 type OneWayToSourceData<'model, 'msg, 'a> = { Set: 'a -> 'model -> 'msg }
 
 
+/// <summary>
+/// Represents a one-way binding for sequences/collections with efficient updating.
+/// </summary>
 type OneWaySeqData<'model, 'a, 'aCollection, 'id when 'id: equality> =
     { Get: 'model -> 'a seq
       CreateCollection: 'a seq -> CollectionTarget<'a, 'aCollection>
@@ -41,23 +58,35 @@ type OneWaySeqData<'model, 'a, 'aCollection, 'id when 'id: equality> =
         Merge.keyed d.GetId d.GetId create update values newVals
 
 
+/// <summary>
+/// Represents a two-way binding that flows data between the model and view in both directions.
+/// </summary>
 type TwoWayData<'model, 'msg, 'a> =
     { Get: 'model -> 'a
       Set: 'a -> 'model -> 'msg }
 
 
+/// <summary>
+/// Represents a command binding following the WPF ICommand pattern.
+/// </summary>
 type CmdData<'model, 'msg> =
     { Exec: obj -> 'model -> 'msg voption
       CanExec: obj -> 'model -> bool
       AutoRequery: bool }
 
 
+/// <summary>
+/// Represents a binding for selected items in a sub-model sequence.
+/// </summary>
 type SubModelSelectedItemData<'model, 'msg, 'id> =
     { Get: 'model -> 'id voption
       Set: 'id voption -> 'model -> 'msg
       SubModelSeqBindingName: string }
 
 
+/// <summary>
+/// Represents a binding to a sub-model/child view model.
+/// </summary>
 type SubModelData<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm> =
     { GetModel: 'model -> 'bindingModel voption
       CreateViewModel: ViewModelArgs<'bindingModel, 'bindingMsg> -> 'vm
@@ -65,6 +94,9 @@ type SubModelData<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm> =
       ToMsg: 'model -> 'bindingMsg -> 'msg }
 
 
+/// <summary>
+/// Represents a binding to a sub-model displayed in a separate window.
+/// </summary>
 and SubModelWinData<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm> =
     { GetState: 'model -> WindowState<'bindingModel>
       CreateViewModel: ViewModelArgs<'bindingModel, 'bindingMsg> -> 'vm
@@ -75,6 +107,9 @@ and SubModelWinData<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm> =
       OnCloseRequested: 'model -> 'msg voption }
 
 
+/// <summary>
+/// Represents a binding to a sequence of sub-models without unique identifiers.
+/// </summary>
 and SubModelSeqUnkeyedData<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 'vmCollection> =
     { GetModels: 'model -> 'bindingModel seq
       CreateViewModel: ViewModelArgs<'bindingModel, 'bindingMsg> -> 'vm
@@ -83,6 +118,9 @@ and SubModelSeqUnkeyedData<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 'vmCol
       ToMsg: 'model -> int * 'bindingMsg -> 'msg }
 
 
+/// <summary>
+/// Represents a binding to a sequence of sub-models with unique identifiers for efficient updates.
+/// </summary>
 and SubModelSeqKeyedData<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 'vmCollection, 'id when 'id: equality> =
     { GetSubModels: 'model -> 'bindingModel seq
       CreateViewModel: ViewModelArgs<'bindingModel, 'bindingMsg> -> 'vm
@@ -103,11 +141,17 @@ and SubModelSeqKeyedData<'model, 'msg, 'bindingModel, 'bindingMsg, 'vm, 'vmColle
         Merge.keyed d.BmToId d.VmToId create update values newSubModels
 
 
+/// <summary>
+/// Wraps a binding with validation capabilities using INotifyDataErrorInfo.
+/// </summary>
 and ValidationData<'model, 'msg, 't> =
     { BindingData: BindingData<'model, 'msg, 't>
       Validate: 'model -> string list }
 
 
+/// <summary>
+/// Wraps a binding with lazy evaluation to skip updates when models are equal.
+/// </summary>
 and LazyData<'model, 'msg, 'bindingModel, 'bindingMsg, 't> =
     { BindingData: BindingData<'bindingModel, 'bindingMsg, 't>
       Get: 'model -> 'bindingModel
@@ -118,6 +162,9 @@ and LazyData<'model, 'msg, 'bindingModel, 'bindingMsg, 't> =
         Helper.mapDispatch getCurrentModel this.Set dispatch
 
 
+/// <summary>
+/// Wraps a binding allowing transformation of the message stream (e.g., throttling, debouncing).
+/// </summary>
 and AlterMsgStreamData<'model, 'msg, 'bindingModel, 'bindingMsg, 'dispatchMsg, 't> =
     { BindingData: BindingData<'bindingModel, 'bindingMsg, 't>
       Get: 'model -> 'bindingModel
@@ -128,6 +175,9 @@ and AlterMsgStreamData<'model, 'msg, 'bindingModel, 'bindingMsg, 'dispatchMsg, '
         Helper.mapDispatch getCurrentModel this.Set dispatch |> this.AlterMsgStream
 
 
+/// <summary>
+/// Discriminated union representing all base binding types.
+/// </summary>
 and BaseBindingData<'model, 'msg, 't> =
     | OneWayData of OneWayData<'model, 't>
     | OneWayToSourceData of OneWayToSourceData<'model, 'msg, 't>
@@ -141,6 +191,9 @@ and BaseBindingData<'model, 'msg, 't> =
     | SubModelSelectedItemData of SubModelSelectedItemData<'model, 'msg, obj>
 
 
+/// <summary>
+/// Main discriminated union representing binding data with possible decorators.
+/// </summary>
 and BindingData<'model, 'msg, 't> =
     | BaseBindingData of BaseBindingData<'model, 'msg, 't>
     | CachingData of BindingData<'model, 'msg, 't>
@@ -234,9 +287,25 @@ module BindingData =
                       Get = d.Get
                       Set = d.Set }
 
+    /// <summary>
+    /// Boxes the type parameter of a binding for generic handling.
+    /// </summary>
+    /// <param name="b">The binding to box.</param>
+    /// <returns>A binding with boxed type parameter.</returns>
     let boxT b = MapT.recursiveCase box unbox b
+    
+    /// <summary>
+    /// Unboxes the type parameter of a binding.
+    /// </summary>
+    /// <param name="b">The binding to unbox.</param>
+    /// <returns>A binding with unboxed type parameter.</returns>
     let unboxT b = MapT.recursiveCase unbox box b
 
+    /// <summary>
+    /// Maps the model of a binding via a contravariant mapping.
+    /// </summary>
+    /// <param name="f">The mapping function.</param>
+    /// <returns>A function that transforms the binding's model type.</returns>
     let mapModel f =
         let binaryHelper binary x m = binary x (f m)
 
@@ -319,6 +388,11 @@ module BindingData =
 
         recursiveCase
 
+    /// <summary>
+    /// Maps the message of a binding with access to the model via a covariant mapping.
+    /// </summary>
+    /// <param name="f">The mapping function that takes a message and the model.</param>
+    /// <returns>A function that transforms the binding's message type.</returns>
     let mapMsgWithModel (f: 'a -> 'model -> 'b) =
         let baseCase =
             function
@@ -394,16 +468,51 @@ module BindingData =
 
         recursiveCase
 
+    /// <summary>
+    /// Maps the message of a binding via a covariant mapping.
+    /// </summary>
+    /// <param name="f">The mapping function.</param>
+    /// <returns>A function that transforms the binding's message type.</returns>
     let mapMsg f = mapMsgWithModel (fun a _ -> f a)
 
+    /// <summary>
+    /// Sets the message of a binding with access to the model.
+    /// </summary>
+    /// <param name="f">Function that produces the message from the model.</param>
+    /// <returns>A function that sets the binding's message based on the model.</returns>
     let setMsgWithModel f = mapMsgWithModel (fun _ m -> f m)
+    
+    /// <summary>
+    /// Sets the message of a binding to a constant value.
+    /// </summary>
+    /// <param name="msg">The message to set.</param>
+    /// <returns>A function that sets the binding's message.</returns>
     let setMsg msg = mapMsg (fun _ -> msg)
 
+    /// <summary>
+    /// Adds caching to the given binding. The cache holds a single value and
+    /// is invalidated after the binding raises the PropertyChanged event.
+    /// </summary>
+    /// <param name="b">The binding to add caching to.</param>
+    /// <returns>A cached binding.</returns>
     let addCaching b = b |> CachingData
 
+    /// <summary>
+    /// Adds validation to the given binding using INotifyDataErrorInfo.
+    /// </summary>
+    /// <param name="validate">Function that returns validation errors for the model.</param>
+    /// <param name="b">The binding to add validation to.</param>
+    /// <returns>A binding with validation.</returns>
     let addValidation validate b =
         { BindingData = b; Validate = validate } |> ValidationData
 
+    /// <summary>
+    /// Adds laziness to the updating of the given binding. If the models are considered equal,
+    /// then updating of the given binding is skipped.
+    /// </summary>
+    /// <param name="equals">Function to determine if two models are equal.</param>
+    /// <param name="b">The binding to add laziness to.</param>
+    /// <returns>A lazy binding.</returns>
     let addLazy (equals: 'model -> 'model -> bool) b =
         { BindingData = b |> mapModel unbox |> mapMsg box
           Get = box
@@ -425,6 +534,12 @@ module BindingData =
                 unbox >> g }
         |> AlterMsgStreamData
 
+    /// <summary>
+    /// Restricts the binding to models that satisfy the predicate after some model satisfies the predicate.
+    /// </summary>
+    /// <param name="predicate">The predicate that determines which models are valid.</param>
+    /// <param name="binding">The binding to which the sticky behavior is added.</param>
+    /// <returns>A binding that remains active only for models satisfying the predicate once triggered.</returns>
     let addSticky (predicate: 'model -> bool) (binding: BindingData<'model, 'msg, 't>) =
         let mutable stickyModel = None
 

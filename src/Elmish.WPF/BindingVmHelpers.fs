@@ -7,9 +7,15 @@ open Microsoft.Extensions.Logging
 open Elmish
 
 
+/// <summary>
+/// Discriminated union representing different types of UI update events
+/// </summary>
 type UpdateData =
+    /// <summary>Validation errors changed for the specified property</summary>
     | ErrorsChanged of string
+    /// <summary>Property value changed for the specified property</summary>
     | PropertyChanged of string
+    /// <summary>Command's CanExecute state changed</summary>
     | CanExecuteChanged of Command
 
 module UpdateData =
@@ -24,14 +30,32 @@ type GetErrorSubModelSelectedItem =
       SubModelSeqBindingName: string
       Id: string }
 
+/// <summary>
+/// Errors that can occur when getting a binding value
+/// </summary>
 [<RequireQualifiedAccess>]
 type GetError =
+    /// <summary>Attempted to get value from a one-way-to-source binding</summary>
     | OneWayToSource
+    /// <summary>Failed to find selected item in sub-model sequence</summary>
     | SubModelSelectedItem of GetErrorSubModelSelectedItem
+    /// <summary>Failed to convert value option to null</summary>
     | ToNullError of ValueOption.ToNullError
 
 
 module Helpers2 =
+    /// <summary>
+    /// Shows a new window with the specified configuration
+    /// </summary>
+    /// <param name="winRef">Weak reference to store the window</param>
+    /// <param name="getWindow">Function to create the window</param>
+    /// <param name="isDialog">Whether to show as modal dialog</param>
+    /// <param name="onCloseRequested">Handler for close requests</param>
+    /// <param name="preventClose">Reference to control close prevention</param>
+    /// <param name="dataContext">Data context for the window</param>
+    /// <param name="initialVisibility">Initial visibility state</param>
+    /// <param name="getCurrentModel">Function to get current model</param>
+    /// <param name="dispatch">Message dispatch function</param>
     let showNewWindow
         (winRef: WeakReference<Window>)
         (getWindow: 'model -> Dispatch<'msg> -> Window)
@@ -75,6 +99,17 @@ module Helpers2 =
                 win.Visibility <- initialVisibility)
         |> ignore
 
+    /// <summary>
+    /// Measures execution time of a function and logs if it exceeds threshold
+    /// </summary>
+    /// <param name="logPerformance">Logger for performance metrics</param>
+    /// <param name="logLevel">Log level to use</param>
+    /// <param name="performanceLogThresholdMs">Threshold in milliseconds</param>
+    /// <param name="name">Name of the measurement</param>
+    /// <param name="nameChain">Binding name chain for context</param>
+    /// <param name="callName">Name of the call being measured</param>
+    /// <param name="f">Function to measure</param>
+    /// <returns>The measured function</returns>
     let measure
         (logPerformance: ILogger)
         (logLevel: LogLevel)
@@ -206,7 +241,13 @@ and AlterMsgStreamBinding<'model, 'bindingModel, 'bindingMsg, 't> =
     { Binding: VmBinding<'bindingModel, 'bindingMsg, 't>
       Get: 'model -> 'bindingModel }
 
+/// <summary>
 /// Represents all necessary data used in an active binding.
+/// This is the core type that encapsulates different binding behaviors.
+/// </summary>
+/// <typeparam name="'model">The type of the model</typeparam>
+/// <typeparam name="'msg">The type of messages</typeparam>
+/// <typeparam name="'t">The type of the binding value</typeparam>
 and VmBinding<'model, 'msg, 't> =
     | BaseVmBinding of BaseVmBinding<'model, 'msg, 't>
     | Cached of CachedBinding<'model, 'msg, 't>
@@ -215,6 +256,10 @@ and VmBinding<'model, 'msg, 't> =
     | AlterMsgStream of AlterMsgStreamBinding<'model, obj, obj, 't>
 
 
+    /// <summary>
+    /// Adds caching behavior to this binding
+    /// </summary>
+    /// <returns>A new binding with caching enabled</returns>
     member this.AddCaching =
         let mutable cache = None in
 
@@ -223,6 +268,12 @@ and VmBinding<'model, 'msg, 't> =
               GetCache = (fun () -> cache)
               SetCache = fun c -> cache <- c }
 
+    /// <summary>
+    /// Adds validation behavior to this binding
+    /// </summary>
+    /// <param name="currentModel">The current model state</param>
+    /// <param name="validate">Validation function</param>
+    /// <returns>A new binding with validation enabled</returns>
     member this.AddValidation currentModel validate =
         { Binding = this
           Validate = validate
@@ -656,11 +707,22 @@ type Initialize<'t>
         }
 
 
+/// <summary>
 /// Updates the binding and returns a list indicating what events to raise for this binding
+/// </summary>
+/// <typeparam name="'t">The type of the binding value</typeparam>
+/// <param name="loggingArgs">Logging configuration</param>
+/// <param name="name">The binding name</param>
 type Update<'t>(loggingArgs: LoggingViewModelArgs, name: string) =
 
     let { log = log; nameChain = nameChain } = loggingArgs
 
+    /// <summary>
+    /// Updates a base binding and returns events to raise
+    /// </summary>
+    /// <param name="newModel">The new model state</param>
+    /// <param name="binding">The binding to update</param>
+    /// <returns>List of update events to raise</returns>
     member _.Base<'model, 'msg>(newModel: 'model, binding: BaseVmBinding<'model, 'msg, 't>) =
         match binding with
         | OneWay _
@@ -827,6 +889,13 @@ type Update<'t>(loggingArgs: LoggingViewModelArgs, name: string) =
 
             []
 
+    /// <summary>
+    /// Recursively updates a binding and its wrappers
+    /// </summary>
+    /// <param name="currentModel">The current model state</param>
+    /// <param name="newModel">The new model state</param>
+    /// <param name="binding">The binding to update</param>
+    /// <returns>List of update events to raise</returns>
     member this.Recursive<'model, 'msg>
         (currentModel: 'model, newModel: 'model, binding: VmBinding<'model, 'msg, 't>)
         : UpdateData list =
@@ -860,8 +929,19 @@ type Update<'t>(loggingArgs: LoggingViewModelArgs, name: string) =
         | AlterMsgStream b -> this.Recursive(currentModel |> b.Get, b.Get newModel, b.Binding)
 
 
+/// <summary>
+/// Gets the value from a binding
+/// </summary>
+/// <typeparam name="'t">The type of the binding value</typeparam>
+/// <param name="nameChain">The binding name chain for logging</param>
 type Get<'t>(nameChain: string) =
 
+    /// <summary>
+    /// Gets the value from a base binding
+    /// </summary>
+    /// <param name="model">The current model state</param>
+    /// <param name="binding">The binding to get value from</param>
+    /// <returns>Result containing the value or an error</returns>
     member _.Base(model: 'model, binding: BaseVmBinding<'model, 'msg, 't>) =
         match binding with
         | OneWay { OneWayData = d } -> d.Get model |> Ok
@@ -892,6 +972,12 @@ type Get<'t>(nameChain: string) =
                         |> Error
             |> Result.bind (ValueOption.toNull >> Result.mapError GetError.ToNullError)
 
+    /// <summary>
+    /// Recursively gets the value from a binding and its wrappers
+    /// </summary>
+    /// <param name="model">The current model state</param>
+    /// <param name="binding">The binding to get value from</param>
+    /// <returns>Result containing the value or an error</returns>
     member this.Recursive<'model, 'msg>(model: 'model, binding: VmBinding<'model, 'msg, 't>) : Result<'t, GetError> =
         match binding with
         | BaseVmBinding b -> this.Base(model, b)
@@ -907,8 +993,19 @@ type Get<'t>(nameChain: string) =
         | AlterMsgStream b -> this.Recursive(b.Get model, b.Binding)
 
 
+/// <summary>
+/// Sets a value in a binding
+/// </summary>
+/// <typeparam name="'t">The type of the binding value</typeparam>
+/// <param name="value">The value to set</param>
 type Set<'t>(value: 't) =
 
+    /// <summary>
+    /// Sets the value in a base binding
+    /// </summary>
+    /// <param name="model">The current model state</param>
+    /// <param name="binding">The binding to set value in</param>
+    /// <returns>True if the value was set, false if binding is read-only</returns>
     member _.Base(model: 'model, binding: BaseVmBinding<'model, 'msg, 't>) =
         match binding with
         | TwoWay b ->
@@ -928,6 +1025,12 @@ type Set<'t>(value: 't) =
         | SubModelSeqUnkeyed _
         | SubModelSeqKeyed _ -> false
 
+    /// <summary>
+    /// Recursively sets the value in a binding and its wrappers
+    /// </summary>
+    /// <param name="model">The current model state</param>
+    /// <param name="binding">The binding to set value in</param>
+    /// <returns>True if the value was set, false if binding is read-only</returns>
     member this.Recursive<'model, 'msg>(model: 'model, binding: VmBinding<'model, 'msg, 't>) : bool =
         match binding with
         | BaseVmBinding b -> this.Base(model, b)

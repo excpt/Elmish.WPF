@@ -14,34 +14,72 @@ module Binding =
         { Name = binding.Name
           Data = binding.Data |> f }
 
+    /// <summary>
     /// Boxes the output parameter.
     /// Allows using a strongly-typed submodel binding (from a module ending in "T")
     /// in a binding list (rather than in a view model class member as normal).
+    /// </summary>
+    /// <param name="binding">The strongly-typed binding to box.</param>
+    /// <returns>A boxed binding suitable for use in binding lists.</returns>
     let boxT (binding: Binding<'b, 'msg, 't>) = BindingData.boxT |> mapData <| binding
 
-    /// Unboxes the output parameter
+    /// <summary>
+    /// Unboxes the output parameter.
+    /// </summary>
+    /// <param name="binding">The boxed binding to unbox.</param>
+    /// <returns>A strongly-typed binding with the output parameter unboxed.</returns>
     let unboxT (binding: Binding<'b, 'msg>) : Binding<'b, 'msg, 't> =
         BindingData.unboxT |> mapData <| binding
 
+    /// <summary>
     /// Maps the model of a binding via a contravariant mapping.
+    /// </summary>
+    /// <param name="f">The mapping function from 'a to 'b.</param>
+    /// <param name="binding">The binding whose model is to be mapped.</param>
+    /// <returns>A binding with the model mapped.</returns>
     let mapModel (f: 'a -> 'b) (binding: Binding<'b, 'msg, 't>) = f |> mapModel |> mapData <| binding
 
+    /// <summary>
     /// Maps the message of a binding with access to the model via a covariant mapping.
+    /// </summary>
+    /// <param name="f">The mapping function that takes a message and the model to produce a new message.</param>
+    /// <param name="binding">The binding whose message is to be mapped.</param>
+    /// <returns>A binding with the message mapped.</returns>
     let mapMsgWithModel (f: 'a -> 'model -> 'b) (binding: Binding<'model, 'a, 't>) =
         f |> mapMsgWithModel |> mapData <| binding
 
+    /// <summary>
     /// Maps the message of a binding via a covariant mapping.
+    /// </summary>
+    /// <param name="f">The mapping function from message 'a to message 'b.</param>
+    /// <param name="binding">The binding whose message is to be mapped.</param>
+    /// <returns>A binding with the message mapped.</returns>
     let mapMsg (f: 'a -> 'b) (binding: Binding<'model, 'a, 't>) = f |> mapMsg |> mapData <| binding
 
+    /// <summary>
     /// Sets the message of a binding with access to the model.
+    /// </summary>
+    /// <param name="f">The function that takes the model and produces the message.</param>
+    /// <param name="binding">The binding whose message is to be set.</param>
+    /// <returns>A binding with the message set based on the model.</returns>
     let setMsgWithModel (f: 'model -> 'b) (binding: Binding<'model, 'a, 't>) =
         f |> setMsgWithModel |> mapData <| binding
 
+    /// <summary>
     /// Sets the message of a binding.
+    /// </summary>
+    /// <param name="msg">The message to set.</param>
+    /// <param name="binding">The binding whose message is to be set.</param>
+    /// <returns>A binding with the specified message.</returns>
     let setMsg (msg: 'b) (binding: Binding<'model, 'a, 't>) = msg |> setMsg |> mapData <| binding
 
 
+    /// <summary>
     /// Restricts the binding to models that satisfy the predicate after some model satisfies the predicate.
+    /// </summary>
+    /// <param name="predicate">The predicate that determines which models are valid.</param>
+    /// <param name="binding">The binding to which the sticky behavior is added.</param>
+    /// <returns>A binding that remains active only for models satisfying the predicate once triggered.</returns>
     let addSticky (predicate: 'model -> bool) (binding: Binding<'model, 'msg, 't>) =
         predicate |> addSticky |> mapData <| binding
 
@@ -106,29 +144,49 @@ module Binding =
     /// </summary>
     module OneWayT =
 
+        /// <summary>
         /// Elemental instance of a one-way binding.
+        /// </summary>
+        /// <param name="name">The name of the binding.</param>
+        /// <returns>A one-way binding.</returns>
         let id<'a, 'msg> : string -> Binding<'a, 'msg, 'a> = OneWay.id |> createBindingT
 
+        /// <summary>
         /// Creates a one-way binding to an optional value. The binding
         /// automatically converts between a missing value in the model and
         /// a <c>null</c> value in the view.
+        /// </summary>
+        /// <param name="x">The name of the binding.</param>
+        /// <returns>A one-way binding for optional values.</returns>
         let opt x : Binding<'a option, 'msg, System.Nullable<'a>> = x |> id |> mapModel Option.toNullable
 
+        /// <summary>
         /// Creates a one-way binding to an optional value. The binding
         /// automatically converts between a missing value in the model and
         /// a <c>null</c> value in the view.
+        /// </summary>
+        /// <param name="x">The name of the binding.</param>
+        /// <returns>A one-way binding for value optional values.</returns>
         let vopt x : Binding<'a voption, 'msg, System.Nullable<'a>> =
             x |> id |> mapModel ValueOption.toNullable
 
+        /// <summary>
         /// Creates a one-way binding to an optional value. The binding
         /// automatically converts between a missing value in the model and
         /// a <c>null</c> value in the view.
+        /// </summary>
+        /// <param name="name">The name of the binding.</param>
+        /// <returns>A one-way binding for optional reference types.</returns>
         let optobj<'a, 'msg when 'a: null> : string -> Binding<'a option, 'msg, 'a> =
             id<'a, 'msg> >> mapModel Option.toObj
 
+        /// <summary>
         /// Creates a one-way binding to an optional value. The binding
         /// automatically converts between a missing value in the model and
         /// a <c>null</c> value in the view.
+        /// </summary>
+        /// <param name="name">The name of the binding.</param>
+        /// <returns>A one-way binding for value optional reference types.</returns>
         let voptobj<'a, 'msg when 'a: null> : string -> Binding<'a voption, 'msg, 'a> =
             id<'a, 'msg> >> mapModel ValueOption.toObj
 
@@ -137,30 +195,50 @@ module Binding =
     /// </summary>
     module OneWayToSourceT =
 
+        /// <summary>
         /// Elemental instance of a one-way-to-source binding.
+        /// </summary>
+        /// <param name="name">The name of the binding.</param>
+        /// <returns>A one-way-to-source binding.</returns>
         let id<'model, 'a> : string -> Binding<'model, 'a, 'a> =
             OneWayToSource.id |> createBindingT
 
+        /// <summary>
         /// Creates a one-way-to-source binding to an optional value. The binding
         /// automatically converts between a missing value in the model and
         /// a <c>null</c> value in the view.
+        /// </summary>
+        /// <param name="name">The name of the binding.</param>
+        /// <returns>A one-way-to-source binding for optional reference types.</returns>
         let optobj<'a, 'model when 'a: null> : string -> Binding<'model, 'a option, 'a> =
             id<'model, 'a> >> mapMsg Option.ofObj
 
+        /// <summary>
         /// Creates a one-way-to-source binding to an optional value. The binding
         /// automatically converts between a missing value in the model and
         /// a <c>null</c> value in the view.
+        /// </summary>
+        /// <param name="name">The name of the binding.</param>
+        /// <returns>A one-way-to-source binding for value optional reference types.</returns>
         let voptobj<'a, 'model when 'a: null> : string -> Binding<'model, 'a voption, 'a> =
             id<'model, 'a> >> mapMsg ValueOption.ofObj
 
+        /// <summary>
         /// Creates a one-way-to-source binding to an optional value. The binding
         /// automatically converts between a missing value in the model and
         /// a <c>null</c> value in the view.
+        /// </summary>
+        /// <param name="x">The name of the binding.</param>
+        /// <returns>A one-way-to-source binding for optional nullable values.</returns>
         let opt x : Binding<'model, 'a option, System.Nullable<'a>> = x |> id |> mapMsg Option.ofNullable
 
+        /// <summary>
         /// Creates a one-way-to-source binding to an optional value. The binding
         /// automatically converts between a missing value in the model and
         /// a <c>null</c> value in the view.
+        /// </summary>
+        /// <param name="x">The name of the binding.</param>
+        /// <returns>A one-way-to-source binding for value optional nullable values.</returns>
         let vopt x : Binding<'model, 'a voption, System.Nullable<'a>> =
             x |> id |> mapMsg ValueOption.ofNullable
 
@@ -169,30 +247,50 @@ module Binding =
     /// </summary>
     module TwoWayT =
 
+        /// <summary>
         /// Elemental instance of a two-way binding.
+        /// </summary>
+        /// <param name="name">The name of the binding.</param>
+        /// <returns>A two-way binding.</returns>
         let id<'a> : string -> Binding<'a, 'a, 'a> = TwoWay.id |> createBindingT
 
+        /// <summary>
         /// Creates a two-way binding to an optional value. The binding
         /// automatically converts between a missing value in the model and
         /// a <c>null</c> value in the view.
+        /// </summary>
+        /// <param name="x">The name of the binding.</param>
+        /// <returns>A two-way binding for optional nullable values.</returns>
         let opt x : Binding<'a option, 'a option, System.Nullable<'a>> =
             x |> id |> mapMsg Option.ofNullable |> mapModel Option.toNullable
 
+        /// <summary>
         /// Creates a two-way binding to an optional value. The binding
         /// automatically converts between a missing value in the model and
         /// a <c>null</c> value in the view.
+        /// </summary>
+        /// <param name="x">The name of the binding.</param>
+        /// <returns>A two-way binding for value optional nullable values.</returns>
         let vopt x : Binding<'a voption, 'a voption, System.Nullable<'a>> =
             x |> id |> mapMsg ValueOption.ofNullable |> mapModel ValueOption.toNullable
 
+        /// <summary>
         /// Creates a two-way binding to an optional value. The binding
         /// automatically converts between a missing value in the model and
         /// a <c>null</c> value in the view.
+        /// </summary>
+        /// <param name="name">The name of the binding.</param>
+        /// <returns>A two-way binding for optional reference types.</returns>
         let optobj<'a when 'a: null> : string -> Binding<'a option, 'a option, 'a> =
             id<'a> >> mapModel Option.toObj >> mapMsg Option.ofObj
 
+        /// <summary>
         /// Creates a two-way binding to an optional value. The binding
         /// automatically converts between a missing value in the model and
         /// a <c>null</c> value in the view.
+        /// </summary>
+        /// <param name="name">The name of the binding.</param>
+        /// <returns>A two-way binding for value optional reference types.</returns>
         let voptobj<'a when 'a: null> : string -> Binding<'a voption, 'a voption, 'a> =
             id<'a> >> mapMsg ValueOption.ofObj >> mapModel ValueOption.toObj
 
@@ -268,67 +366,105 @@ module Binding =
 
     module OneWay =
 
+        /// <summary>
         /// Elemental instance of a one-way binding.
+        /// </summary>
+        /// <param name="name">The name of the binding.</param>
+        /// <returns>A one-way binding.</returns>
         let id<'a, 'msg> : string -> Binding<'a, 'msg> = OneWay.id |> createBinding
 
+        /// <summary>
         /// Creates a one-way binding to an optional value. The binding
         /// automatically converts between a missing value in the model and
         /// a <c>null</c> value in the view.
+        /// </summary>
+        /// <param name="name">The name of the binding.</param>
+        /// <returns>A one-way binding for optional values.</returns>
         let opt<'a, 'msg> : string -> Binding<'a option, 'msg> =
             id<obj, 'msg> >> mapModel Option.box
 
+        /// <summary>
         /// Creates a one-way binding to an optional value. The binding
         /// automatically converts between a missing value in the model and
         /// a <c>null</c> value in the view.
+        /// </summary>
+        /// <param name="name">The name of the binding.</param>
+        /// <returns>A one-way binding for value optional values.</returns>
         let vopt<'a, 'msg> : string -> Binding<'a voption, 'msg> =
             id<obj, 'msg> >> mapModel ValueOption.box
 
 
     module OneWayToSource =
 
+        /// <summary>
         /// Elemental instance of a one-way-to-source binding.
+        /// </summary>
+        /// <param name="name">The name of the binding.</param>
+        /// <returns>A one-way-to-source binding.</returns>
         let id<'model, 'a> : string -> Binding<'model, 'a> =
             OneWayToSource.id |> createBinding
 
+        /// <summary>
         /// Creates a one-way-to-source binding to an optional value. The binding
         /// automatically converts between a missing value in the model and
         /// a <c>null</c> value in the view.
+        /// </summary>
+        /// <param name="name">The name of the binding.</param>
+        /// <returns>A one-way-to-source binding for value optional values.</returns>
         let vopt<'model, 'a> : string -> Binding<'model, 'a voption> =
             id<'model, obj> >> mapMsg ValueOption.unbox
 
+        /// <summary>
         /// Creates a one-way-to-source binding to an optional value. The binding
         /// automatically converts between a missing value in the model and
         /// a <c>null</c> value in the view.
+        /// </summary>
+        /// <param name="name">The name of the binding.</param>
+        /// <returns>A one-way-to-source binding for optional values.</returns>
         let opt<'model, 'a> : string -> Binding<'model, 'a option> =
             id<'model, obj> >> mapMsg Option.unbox
 
 
     module TwoWay =
 
+        /// <summary>
         /// Elemental instance of a two-way binding.
+        /// </summary>
+        /// <param name="name">The name of the binding.</param>
+        /// <returns>A two-way binding.</returns>
         let id<'a> : string -> Binding<'a, 'a> = TwoWay.id |> createBinding
 
+        /// <summary>
         /// Creates a two-way binding to an optional value. The binding
         /// automatically converts between a missing value in the model and
         /// a <c>null</c> value in the view.
+        /// </summary>
+        /// <param name="name">The name of the binding.</param>
+        /// <returns>A two-way binding for value optional values.</returns>
         let vopt<'a> : string -> Binding<'a voption, 'a voption> =
             id<obj> >> mapModel ValueOption.box >> mapMsg ValueOption.unbox
 
+        /// <summary>
         /// Creates a two-way binding to an optional value. The binding
         /// automatically converts between a missing value in the model and
         /// a <c>null</c> value in the view.
+        /// </summary>
+        /// <param name="name">The name of the binding.</param>
+        /// <returns>A two-way binding for optional values.</returns>
         let opt<'a> : string -> Binding<'a option, 'a option> =
             id<obj> >> mapModel Option.box >> mapMsg Option.unbox
 
 
     module SubModelSelectedItem =
 
+        /// <summary>
         /// Creates a two-way binding to a <c>SelectedItem</c>-like property where
         /// the <c>ItemsSource</c>-like property is a <see cref="subModelSeq" />
         /// binding. Automatically converts the dynamically created Elmish.WPF view
         /// models to/from their corresponding IDs, so the Elmish user code only has
         /// to work with the IDs.
-        ///
+        /// </summary>
+        /// <remarks>
         /// Only use this if you are unable to use some kind of <c>SelectedValue</c>
         /// or <c>SelectedIndex</c> property with a normal <see cref="twoWay" />
         /// binding. This binding is less type-safe. It will throw when initializing
@@ -336,18 +472,24 @@ module Binding =
         /// does not correspond to a <see cref="subModelSeq" /> binding, and it will
         /// throw at runtime if the inferred <c>'id</c> type does not match the
         /// actual ID type used in that binding.
+        /// </remarks>
+        /// <param name="subModelSeqBindingName">The name of the subModelSeq binding.</param>
+        /// <param name="name">The name of the binding.</param>
+        /// <returns>A two-way binding for the selected item ID.</returns>
         let vopt subModelSeqBindingName : string -> Binding<'id voption, 'id voption> =
             SubModelSelectedItem.create subModelSeqBindingName
             |> createBinding
             >> mapModel (ValueOption.map box)
             >> mapMsg (ValueOption.map unbox)
 
+        /// <summary>
         /// Creates a two-way binding to a <c>SelectedItem</c>-like property where
         /// the <c>ItemsSource</c>-like property is a <see cref="subModelSeq" />
         /// binding. Automatically converts the dynamically created Elmish.WPF view
         /// models to/from their corresponding IDs, so the Elmish user code only has
         /// to work with the IDs.
-        ///
+        /// </summary>
+        /// <remarks>
         /// Only use this if you are unable to use some kind of <c>SelectedValue</c>
         /// or <c>SelectedIndex</c> property with a normal <see cref="twoWay" />
         /// binding. This binding is less type-safe. It will throw when initializing
@@ -355,6 +497,10 @@ module Binding =
         /// does not correspond to a <see cref="subModelSeq" /> binding, and it will
         /// throw at runtime if the inferred <c>'id</c> type does not match the
         /// actual ID type used in that binding.
+        /// </remarks>
+        /// <param name="subModelSeqBindingName">The name of the subModelSeq binding.</param>
+        /// <param name="name">The name of the binding.</param>
+        /// <returns>A two-way binding for the selected item ID.</returns>
         let opt subModelSeqBindingName : string -> Binding<'id option, 'id option> =
             vopt subModelSeqBindingName
             >> mapModel ValueOption.ofOption
@@ -412,13 +558,21 @@ module Binding =
     /// </summary>
     module SubModelT =
 
+        /// <summary>
         /// Exposes an optional view model member for binding.
+        /// </summary>
+        /// <param name="createVm">Function to create the view model.</param>
+        /// <returns>A binding function for optional view models.</returns>
         let opt
             (createVm: ViewModelArgs<'bindingModel, 'msg> -> #IViewModel<'bindingModel, 'msg>)
             : (string -> Binding<'bindingModel voption, 'msg, #IViewModel<'bindingModel, 'msg>>) =
             SubModel.create createVm IViewModel.updateModel |> createBindingT
 
+        /// <summary>
         /// Exposes a non-optional view model member for binding.
+        /// </summary>
+        /// <param name="createVm">Function to create the view model.</param>
+        /// <returns>A binding function for required view models.</returns>
         let req
             (createVm: ViewModelArgs<'bindingModel, 'msg> -> #IViewModel<'bindingModel, 'msg>)
             : (string -> Binding<'bindingModel, 'msg, #IViewModel<'bindingModel, 'msg>>) =
@@ -455,6 +609,8 @@ module Binding =
         ///   The function applied to every element of the bound <c>ObservableCollection</c>
         ///   to create a child view model.
         /// </param>
+        /// <param name="name">The name of the binding.</param>
+        /// <returns>A binding for a collection of view models identified by index.</returns>
         let id
             (createVm: ViewModelArgs<'bindingModel, 'msg> -> #IViewModel<'bindingModel, 'msg>)
             : (string
@@ -547,13 +703,21 @@ module Binding =
 
 
     module SelectedIndex =
+        /// <summary>
         /// Prebuilt binding intended for use with <code>Selector.SelectedIndex</code>.
+        /// </summary>
+        /// <param name="name">The name of the binding.</param>
+        /// <returns>A two-way binding for nullable selected index.</returns>
         let vopt =
             TwoWay.id
             >> mapModel (ValueOption.defaultValue -1)
             >> mapMsg (fun i -> if i < 0 then ValueNone else ValueSome i)
 
+        /// <summary>
         /// Prebuilt binding intended for use with <code>Selector.SelectedIndex</code>.
+        /// </summary>
+        /// <param name="name">The name of the binding.</param>
+        /// <returns>A two-way binding for optional selected index.</returns>
         let opt = vopt >> mapModel ValueOption.ofOption >> mapMsg ValueOption.toOption
 
 
@@ -579,15 +743,30 @@ module Binding =
 
 module Bindings =
 
+    /// <summary>
     /// Maps the model of a list of bindings via a contravariant mapping.
+    /// </summary>
+    /// <param name="f">The mapping function from 'a to 'b.</param>
+    /// <param name="bindings">The list of bindings to map.</param>
+    /// <returns>A list of bindings with the model mapped.</returns>
     let mapModel (f: 'a -> 'b) (bindings: Binding<'b, 'msg> list) =
         f |> Binding.mapModel |> List.map <| bindings
 
+    /// <summary>
     /// Maps the message of a list of bindings with access to the model via a covariant mapping.
+    /// </summary>
+    /// <param name="f">The mapping function that takes a message and the model to produce a new message.</param>
+    /// <param name="bindings">The list of bindings to map.</param>
+    /// <returns>A list of bindings with the message mapped.</returns>
     let mapMsgWithModel (f: 'a -> 'model -> 'b) (bindings: Binding<'model, 'a> list) =
         f |> Binding.mapMsgWithModel |> List.map <| bindings
 
+    /// <summary>
     /// Maps the message of a list of bindings via a covariant mapping.
+    /// </summary>
+    /// <param name="f">The mapping function from message 'a to message 'b.</param>
+    /// <param name="bindings">The list of bindings to map.</param>
+    /// <returns>A list of bindings with the message mapped.</returns>
     let mapMsg (f: 'a -> 'b) (bindings: Binding<'model, 'a> list) =
         f |> Binding.mapMsg |> List.map <| bindings
 

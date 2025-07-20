@@ -5,10 +5,20 @@ open System.Collections.Generic
 open System.Collections.ObjectModel
 
 
+/// <summary>
+/// Discriminated union indicating whether an error occurred in the source or target sequence
+/// </summary>
 type SourceOrTarget =
     | Source
     | Target
 
+/// <summary>
+/// Exception thrown when duplicate IDs are found in a keyed collection merge operation
+/// </summary>
+/// <param name="sourceOrTarget">Whether the duplicate was found in the source or target sequence</param>
+/// <param name="index1">Index of the first occurrence of the duplicate ID</param>
+/// <param name="index2">Index of the second occurrence of the duplicate ID</param>
+/// <param name="id">The duplicate ID value</param>
 type DuplicateIdException(sourceOrTarget: SourceOrTarget, index1: int, index2: int, id: string) =
     inherit
         System.Exception(
@@ -25,6 +35,11 @@ type DuplicateIdException(sourceOrTarget: SourceOrTarget, index1: int, index2: i
     member this.Index2 = index2
     member this.Id = id
 
+/// <summary>
+/// Abstraction over mutable collections that allows for efficient updates during merge operations
+/// </summary>
+/// <typeparam name="'a">The type of elements in the collection</typeparam>
+/// <typeparam name="'aCollection">The type of the collection itself</typeparam>
 type CollectionTarget<'a, 'aCollection> =
     { GetLength: unit -> int
       GetAt: int -> 'a
@@ -39,6 +54,11 @@ type CollectionTarget<'a, 'aCollection> =
 
 module CollectionTarget =
 
+    /// <summary>
+    /// Creates a CollectionTarget from an ObservableCollection
+    /// </summary>
+    /// <param name="oc">The ObservableCollection to wrap</param>
+    /// <returns>A CollectionTarget that manipulates the ObservableCollection</returns>
     let create (oc: ObservableCollection<'a>) =
         { GetLength = fun () -> oc.Count
           GetAt = fun i -> oc.[i]
@@ -51,6 +71,13 @@ module CollectionTarget =
           Enumerate = fun () -> upcast oc
           GetCollection = fun () -> oc }
 
+    /// <summary>
+    /// Maps the element type of a CollectionTarget using bidirectional transformation functions
+    /// </summary>
+    /// <param name="fOut">Function to transform elements when reading from the collection</param>
+    /// <param name="fIn">Function to transform elements when writing to the collection</param>
+    /// <param name="ct">The CollectionTarget to map</param>
+    /// <returns>A new CollectionTarget with transformed element type</returns>
     let mapA
         (fOut: 'a0 -> 'a1)
         (fIn: 'a1 -> 'a0)
@@ -67,6 +94,12 @@ module CollectionTarget =
           Enumerate = ct.Enumerate >> Seq.map fOut
           GetCollection = ct.GetCollection }
 
+    /// <summary>
+    /// Maps the collection type of a CollectionTarget
+    /// </summary>
+    /// <param name="fOut">Function to transform the collection type</param>
+    /// <param name="ct">The CollectionTarget to map</param>
+    /// <returns>A new CollectionTarget with transformed collection type</returns>
     let mapCollection
         (fOut: 'aCollection0 -> 'aCollection1)
         (ct: CollectionTarget<'a, 'aCollection0>)
@@ -86,6 +119,13 @@ module CollectionTarget =
 
 module Merge =
 
+    /// <summary>
+    /// Merges a source sequence into a target collection without using keys, updating by position
+    /// </summary>
+    /// <param name="create">Function to create a new target element from a source element and index</param>
+    /// <param name="update">Function to update an existing target element with data from a source element</param>
+    /// <param name="target">The target collection to merge into</param>
+    /// <param name="source">The source sequence to merge from</param>
     let unkeyed
         (create: 's -> int -> 't)
         (update: 't -> 's -> unit)
@@ -109,6 +149,17 @@ module Merge =
             idx <- idx - 1
 
 
+    /// <summary>
+    /// Merges a source array into a target collection using keys for efficient updates.
+    /// Based on Elm's HTML.keyed algorithm for efficient virtual DOM updates.
+    /// </summary>
+    /// <param name="getSourceId">Function to extract ID from source elements</param>
+    /// <param name="getTargetId">Function to extract ID from target elements</param>
+    /// <param name="create">Function to create a new target element from source element and ID</param>
+    /// <param name="update">Function to update an existing target element with data from source element and index</param>
+    /// <param name="target">The target collection to merge into</param>
+    /// <param name="source">The source array to merge from</param>
+    /// <exception cref="DuplicateIdException">Thrown when duplicate IDs are found in either sequence</exception>
     let keyed
         (getSourceId: 's -> 'id)
         (getTargetId: 't -> 'id)
