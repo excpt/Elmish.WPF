@@ -10,22 +10,25 @@ open System.Windows.Input
 /// another UI control (e.g. a ListView.SelectedItem).
 type internal Command(execute, canExecute) =
 
-  let canExecuteChanged = Event<EventHandler, EventArgs>()
+    let canExecuteChanged = Event<EventHandler, EventArgs>()
 
-  // CommandManager only keeps a weak reference to the event handler,
-  // so a strong reference must be maintained,
-  // which is achieved by this mutable let-binding.
-  // Can test this via the UiBoundCmdParam sample.
-  let mutable _handler = Unchecked.defaultof<EventHandler>
-  member this.AddRequeryHandler () =
-    let handler = EventHandler(fun _ _ -> this.RaiseCanExecuteChanged())
-    CommandManager.RequerySuggested.AddHandler handler
-    _handler <- handler
+    // CommandManager only keeps a weak reference to the event handler,
+    // so a strong reference must be maintained,
+    // which is achieved by this mutable let-binding.
+    // Can test this via the UiBoundCmdParam sample.
+    let mutable _handler = Unchecked.defaultof<EventHandler>
 
-  member this.RaiseCanExecuteChanged () = canExecuteChanged.Trigger(this, EventArgs.Empty)
+    member this.AddRequeryHandler() =
+        let handler = EventHandler(fun _ _ -> this.RaiseCanExecuteChanged())
+        CommandManager.RequerySuggested.AddHandler handler
+        _handler <- handler
 
-  interface ICommand with
-    [<CLIEvent>]
-    member _.CanExecuteChanged = canExecuteChanged.Publish
-    member _.CanExecute p = canExecute p
-    member _.Execute p = execute p
+    member this.RaiseCanExecuteChanged() =
+        canExecuteChanged.Trigger(this, EventArgs.Empty)
+
+    interface ICommand with
+        [<CLIEvent>]
+        member _.CanExecuteChanged = canExecuteChanged.Publish
+
+        member _.CanExecute p = canExecute p
+        member _.Execute p = execute p
