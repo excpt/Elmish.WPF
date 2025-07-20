@@ -9,7 +9,6 @@
     <File Path="LICENSE.md" />
   </Folder>
   <Folder Name="/src/">
-    <Project Path="src/Elmish.WPF.Benchmarks/Elmish.WPF.Benchmarks.fsproj" />
     <Project Path="src/Elmish.WPF/Elmish.WPF.fsproj" />
   </Folder>
   <Folder Name="/src/Samples/" />
