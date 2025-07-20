@@ -58,14 +58,14 @@ type TreeViewModel(args) =
 
     let createTreeVm (args: ViewModelArgs<Tree<string>, unit>) = TreeViewModel(args)
 
-    member _.Data =
-        base.Get () (Binding.OneWayT.id >> Binding.mapModel Tree.Data.get)
+    member _.Data = base.Get () (Binding.OneWayT.id >> Binding.mapModel Tree.Data.get)
 
     member _.SelectedValueChildren =
         base.Get
             ()
-            (Binding.SubModelSeqKeyedT.id createTreeVm (fun t -> t.Data)
-             >> Binding.mapModel (Tree.Children.get))
+            (Binding.SubModelSeqUnkeyedT.id createTreeVm
+             >> Binding.mapModel (Tree.Children.get >> List.ofSeq)
+             >> Binding.mapMsg snd)
 
 [<AllowNullLiteral>]
 type SelectionViewModel(args) =
@@ -73,31 +73,35 @@ type SelectionViewModel(args) =
 
     let createTreeVm (args: ViewModelArgs<Tree<string>, unit>) = TreeViewModel(args)
 
-    member _.SelectedIndex =
-        base.Get
-            ()
-            (Binding.SelectedIndexT.id
-             >> Binding.mapModel Selection.SelectedIndex.get
-             >> Binding.mapMsg SetSelectedIndex)
+    let selectedIndexBinding =
+        Binding.TwoWayT.id
+        >> Binding.addLazy (=)
+        >> Binding.mapModel (fun (m: Selection) -> m.SelectedIndex |> Option.defaultValue -1)
+        >> Binding.mapMsg (fun v -> SetSelectedIndex(if v = -1 then None else Some v))
 
-    member _.DeselectIndex =
-        base.Get
-            ()
-            (Binding.CmdT.setIf
-             >> Binding.mapModel (Selection.SelectedIndex.get >> Option.map (fun _ -> SetSelectedIndex None)))
+    let selectedValueBinding =
+        Binding.TwoWayT.id
+        >> Binding.addLazy (=)
+        >> Binding.mapModel (fun (m: Selection) -> m.SelectedValue |> Option.defaultValue "")
+        >> Binding.mapMsg (fun v -> SetSelectedValue(if v = "" then None else Some v))
+
+    member this.SelectedIndex 
+        with get() = base.Get() selectedIndexBinding
+        and set(value) = base.Set(value) selectedIndexBinding
+
+    member _.DeselectIndex = 
+        base.Get () (Binding.CmdT.set (fun m -> m.SelectedIndex.IsSome) (SetSelectedIndex None))
 
     member _.SelectedIndexData =
         base.Get () (Binding.OneWayT.id >> Binding.mapModel Selection.SelectedIndexData.get)
 
-    member _.SelectedValue =
-        base.Get
-            ()
-            (Binding.TwoWayOptT.id
-             >> Binding.mapModel Selection.SelectedValue.get
-             >> Binding.mapMsg SetSelectedValue)
+    member this.SelectedValue
+        with get() = base.Get() selectedValueBinding
+        and set(value) = base.Set(value) selectedValueBinding
 
-    member _.SelectedValueData =
+    member _.SelectedValueData = 
         base.Get
             ()
-            (Binding.SubModelSeqKeyedT.id createTreeVm (fun t -> t.Data)
-             >> Binding.mapModel Selection.SelectedValueData.get)
+            (Binding.SubModelSeqUnkeyedT.id createTreeVm
+             >> Binding.mapModel (Selection.SelectedValueData.get >> List.ofSeq)
+             >> Binding.mapMsg (fun _ -> failwith "TreeViewModel should not send messages"))

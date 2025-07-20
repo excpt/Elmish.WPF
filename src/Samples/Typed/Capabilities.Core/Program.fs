@@ -52,7 +52,7 @@ type MainViewModel(args) =
     member _.Selection =
         base.Get
             ()
-            (Binding.SubModelT.required selectionVm
+            (Binding.SubModelT.req selectionVm
              >> Binding.mapModel Program.Selection.get
              >> Binding.mapMsg SelectionMsg)
 

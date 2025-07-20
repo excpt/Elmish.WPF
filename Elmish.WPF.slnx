@@ -47,14 +47,36 @@
     <Project Path="src/Samples/Dynamic/Validation/Validation.csproj" />
   </Folder>
   <Folder Name="/src/Samples/Typed/">
+    <Project Path="src/Samples/Typed/Capabilities.Core/Capabilities.Core.fsproj" />
+    <Project Path="src/Samples/Typed/Capabilities/Capabilities.csproj" />
+    <Project Path="src/Samples/Typed/EventBindingsAndBehaviors.Core/EventBindingsAndBehaviors.Core.fsproj" />
+    <Project Path="src/Samples/Typed/EventBindingsAndBehaviors/EventBindingsAndBehaviors.csproj" />
+    <Project Path="src/Samples/Typed/FileDialogs.Core/FileDialogs.Core.fsproj" />
+    <Project Path="src/Samples/Typed/FileDialogs/FileDialogs.csproj" />
+    <Project Path="src/Samples/Typed/FileDialogsCmdMsg.Core/FileDialogsCmdMsg.Core.fsproj" />
+    <Project Path="src/Samples/Typed/FileDialogsCmdMsg/FileDialogsCmdMsg.csproj" />
+    <Project Path="src/Samples/Typed/Multiselect.Core/Multiselect.Core.fsproj" />
+    <Project Path="src/Samples/Typed/Multiselect/Multiselect.csproj" />
+    <Project Path="src/Samples/Typed/NewWindow.Core/NewWindow.Core.fsproj" />
+    <Project Path="src/Samples/Typed/NewWindow/NewWindow.csproj" />
+    <Project Path="src/Samples/Typed/OneWaySeq.Core/OneWaySeq.Core.fsproj" />
+    <Project Path="src/Samples/Typed/OneWaySeq/OneWaySeq.csproj" />
     <Project Path="src/Samples/Typed/SingleCounter.Core/SingleCounter.Core.fsproj" />
     <Project Path="src/Samples/Typed/SingleCounter/SingleCounter.csproj" />
+    <Project Path="src/Samples/Typed/Sticky.Core/Sticky.Core.fsproj" />
+    <Project Path="src/Samples/Typed/Sticky/Sticky.csproj" />
     <Project Path="src/Samples/Typed/SubModelOpt.Core/SubModelOpt.Core.fsproj" />
     <Project Path="src/Samples/Typed/SubModelOpt/SubModelOpt.csproj" />
+    <Project Path="src/Samples/Typed/SubModelSelectedItem.Core/SubModelSelectedItem.Core.fsproj" />
+    <Project Path="src/Samples/Typed/SubModelSelectedItem/SubModelSelectedItem.csproj" />
     <Project Path="src/Samples/Typed/SubModelSeq.Core/SubModelSeq.Core.fsproj" />
     <Project Path="src/Samples/Typed/SubModelSeq/SubModelSeq.csproj" />
     <Project Path="src/Samples/Typed/SubModelStatic.Core/SubModelStatic.Core.fsproj" />
     <Project Path="src/Samples/Typed/SubModelStatic/SubModelStatic.csproj" />
+    <Project Path="src/Samples/Typed/Threading.Core/Threading.Core.fsproj" />
+    <Project Path="src/Samples/Typed/Threading/Threading.csproj" />
+    <Project Path="src/Samples/Typed/UiBoundCmdParam.Core/UiBoundCmdParam.Core.fsproj" />
+    <Project Path="src/Samples/Typed/UiBoundCmdParam/UiBoundCmdParam.csproj" />
     <Project Path="src/Samples/Typed/Validation.Core/Validation.Core.fsproj" />
     <Project Path="src/Samples/Typed/Validation/Validation.csproj" />
   </Folder>
