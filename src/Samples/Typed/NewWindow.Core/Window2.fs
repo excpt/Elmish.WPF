@@ -48,7 +48,7 @@ module Window2 =
         | Cancel -> ConfirmState.Cancel |> Some |> ConfirmState.set
         | Close -> ConfirmState.Close |> Some |> ConfirmState.set
 
-    let private confirmStateToMsg confirmState msg m =
+    let confirmStateToMsg confirmState msg m =
         if m.ConfirmState = Some confirmState then
             InOut.Out Window2OutMsg.Close
         else
@@ -91,16 +91,10 @@ type Window2ViewModel(args) =
              >> Binding.mapModel (fun m -> m.ConfirmState = Some ConfirmState.Close |> Bool.toVisibilityCollapsed))
 
     member _.Submit =
-        base.Get
-            ()
-            (Binding.CmdT.set (fun _ -> true) (Window2.confirmStateToMsg ConfirmState.Submit Submit))
+        base.Get () (Binding.CmdT.setAlways (InOut.In Submit))
 
     member _.Cancel =
-        base.Get
-            ()
-            (Binding.CmdT.set (fun _ -> true) (Window2.confirmStateToMsg ConfirmState.Cancel Cancel))
+        base.Get () (Binding.CmdT.setAlways (InOut.In Cancel))
 
     member _.Close =
-        base.Get
-            ()
-            (Binding.CmdT.set (fun _ -> true) (Window2.confirmStateToMsg ConfirmState.Close Close))
+        base.Get () (Binding.CmdT.setAlways (InOut.In Close))

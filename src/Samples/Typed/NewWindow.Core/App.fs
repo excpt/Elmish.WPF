@@ -65,13 +65,16 @@ type AppViewModel(args) =
     member _.Window1 =
         base.Get
             ()
-            (Binding.SubModelWinT.id window1Vm
-             >> Binding.mapModel (fun m -> m.Window1)
-             >> Binding.mapMsg (fun s -> Window1SetInput s))
+            (Binding.SubModelWinT.id (fun m -> m.Window1) window1Vm (fun _ _ -> Window()) false (fun _ -> ValueNone)
+             >> Binding.mapMsg Window1SetInput)
 
     member _.Window2 =
         base.Get
             ()
-            (Binding.SubModelWinT.id window2Vm
-             >> Binding.mapModel (fun m -> App.Window2.get m |> WindowState.ofOption)
+            (Binding.SubModelWinT.id
+                (fun m -> App.Window2.get m |> WindowState.ofOption)
+                window2Vm
+                (fun _ _ -> Window())
+                true
+                (fun _ -> ValueNone)
              >> Binding.mapMsg App.Window2.mapInOutMsg)

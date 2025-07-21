@@ -61,19 +61,31 @@ let paramToNewMousePositionMsg (p: obj) =
 type MainViewModel(args) =
     inherit ViewModelBase<Model, Msg>(args)
 
-    member _.Msg1 = base.Get() (Binding.OneWayT.id >> Binding.mapModel (fun m -> m.Msg1))
-    member _.Msg2 = base.Get() (Binding.OneWayT.id >> Binding.mapModel (fun m -> m.Msg2))
-    member _.GotFocus1 = base.Get() (Binding.CmdT.setAlways GotFocus1)
-    member _.GotFocus2 = base.Get() (Binding.CmdT.setAlways GotFocus2)
-    member _.LostFocus1 = base.Get() (Binding.CmdT.setAlways LostFocus1)
-    member _.LostFocus2 = base.Get() (Binding.CmdT.setAlways LostFocus2)
-    member _.ToggleVisibility = base.Get() (Binding.CmdT.setAlways ToggleVisibility)
-    member _.ButtonText = base.Get() (Binding.OneWayT.id >> Binding.mapModel (fun m -> m.ButtonText))
-    member _.TextBoxVisibility = base.Get() (Binding.OneWayT.id >> Binding.mapModel (fun m -> m.Visibility))
-    member _.MouseMoveCommand = 
-        base.Get() (Binding.CmdT.id false (fun p _ -> true) >> Binding.mapMsg paramToNewMousePositionMsg)
-    member _.MousePosition = 
-        base.Get() (Binding.OneWayT.id >> Binding.mapModel (fun m -> sprintf "%dx%d" m.MousePosition.X m.MousePosition.Y))
+    member _.Msg1 = base.Get () (Binding.OneWayT.id >> Binding.mapModel (fun m -> m.Msg1))
+    member _.Msg2 = base.Get () (Binding.OneWayT.id >> Binding.mapModel (fun m -> m.Msg2))
+    member _.GotFocus1 = base.Get () (Binding.CmdT.setAlways GotFocus1)
+    member _.GotFocus2 = base.Get () (Binding.CmdT.setAlways GotFocus2)
+    member _.LostFocus1 = base.Get () (Binding.CmdT.setAlways LostFocus1)
+    member _.LostFocus2 = base.Get () (Binding.CmdT.setAlways LostFocus2)
+    member _.ToggleVisibility = base.Get () (Binding.CmdT.setAlways ToggleVisibility)
+
+    member _.ButtonText =
+        base.Get () (Binding.OneWayT.id >> Binding.mapModel (fun m -> m.ButtonText))
+
+    member _.TextBoxVisibility =
+        base.Get () (Binding.OneWayT.id >> Binding.mapModel (fun m -> m.Visibility))
+
+    member _.MouseMoveCommand =
+        base.Get
+            ()
+            (Binding.CmdT.id false (fun p _ -> true)
+             >> Binding.mapMsg paramToNewMousePositionMsg)
+
+    member _.MousePosition =
+        base.Get
+            ()
+            (Binding.OneWayT.id
+             >> Binding.mapModel (fun m -> sprintf "%dx%d" m.MousePosition.X m.MousePosition.Y))
 
 let designVm = MainViewModel(ViewModelArgs.simple (init ()))
 

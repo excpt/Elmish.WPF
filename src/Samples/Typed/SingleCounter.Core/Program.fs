@@ -2,7 +2,6 @@ module Elmish.WPF.Samples.SingleCounter.Program
 
 open Serilog
 open Serilog.Extensions.Logging
-open Elmish
 open Elmish.WPF
 
 module Counter =
@@ -29,19 +28,21 @@ module Counter =
 type CounterViewModel(args) =
     inherit ViewModelBase<Counter.Model, Counter.Msg>(args)
 
+    let stepSizeBinding =
+        Binding.TwoWayT.id
+        >> Binding.addLazy (=)
+        >> Binding.mapModel (fun (m: Counter.Model) -> float m.StepSize)
+        >> Binding.mapMsg (int >> Counter.SetStepSize)
+
     member _.CounterValue =
         base.Get () (Binding.OneWayT.id >> Binding.addLazy (=) >> Binding.mapModel (fun m -> m.Count))
 
     member _.Increment = base.Get () (Binding.CmdT.setAlways Counter.Increment)
     member _.Decrement = base.Get () (Binding.CmdT.setAlways Counter.Decrement)
 
-    member _.StepSize =
-        base.Get
-            ()
-            (Binding.TwoWayT.id
-             >> Binding.addLazy (=)
-             >> Binding.mapModel (fun (m: Counter.Model) -> float m.StepSize)
-             >> Binding.mapMsg (int >> Counter.SetStepSize))
+    member this.StepSize
+        with get () = base.Get () stepSizeBinding
+        and set (value) = base.Set (value) stepSizeBinding
 
     member _.Reset = base.Get () (Binding.CmdT.set Counter.canReset Counter.Reset)
 

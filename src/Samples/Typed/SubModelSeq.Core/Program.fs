@@ -3,7 +3,6 @@ module Elmish.WPF.Samples.SubModelSeq.Program
 open System
 open Serilog
 open Serilog.Extensions.Logging
-open Elmish
 open Elmish.WPF
 
 module Counter =
@@ -91,6 +90,12 @@ type InOutMsg<'a, 'b> =
 type CounterWithRemoveViewModel(args) =
     inherit ViewModelBase<Counter.Model, InOutMsg<Counter.Msg, App.CounterOutMsg>>(args)
 
+    let stepSizeBinding =
+        Binding.TwoWayT.id
+        >> Binding.addLazy (=)
+        >> Binding.mapModel (fun (m: Counter.Model) -> float m.StepSize)
+        >> Binding.mapMsg (int >> Counter.SetStepSize >> InMsg)
+
     member _.CounterId =
         base.Get () (Binding.OneWayT.id >> Binding.addLazy (=) >> Binding.mapModel (fun m -> m.Id))
 
@@ -100,13 +105,9 @@ type CounterWithRemoveViewModel(args) =
     member _.Increment = base.Get () (Binding.CmdT.setAlways (InMsg Counter.Increment))
     member _.Decrement = base.Get () (Binding.CmdT.setAlways (InMsg Counter.Decrement))
 
-    member _.StepSize =
-        base.Get
-            ()
-            (Binding.TwoWayT.id
-             >> Binding.addLazy (=)
-             >> Binding.mapModel (fun (m: Counter.Model) -> float m.StepSize)
-             >> Binding.mapMsg (int >> Counter.SetStepSize >> InMsg))
+    member this.StepSize
+        with get () = base.Get () stepSizeBinding
+        and set (value) = base.Set (value) stepSizeBinding
 
     member _.Reset = base.Get () (Binding.CmdT.set Counter.canReset (InMsg Counter.Reset))
 

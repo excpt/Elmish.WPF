@@ -1,12 +1,11 @@
 using System.Windows;
 
-namespace Elmish.WPF.Samples.SubModelOpt
+namespace Elmish.WPF.Samples.SubModelOpt;
+
+public partial class MainWindow : Window
 {
-    public partial class MainWindow : Window
+    public MainWindow()
     {
-        public MainWindow()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

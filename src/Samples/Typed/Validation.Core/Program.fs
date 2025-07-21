@@ -4,7 +4,6 @@ open System
 open System.Linq
 open Serilog
 open Serilog.Extensions.Logging
-open Elmish
 open Elmish.WPF
 
 module Result =
@@ -83,6 +82,20 @@ module Validation =
 type ValidationViewModel(args) =
     inherit ViewModelBase<Validation.Model, Validation.Msg>(args)
 
+    let valueBinding =
+        Binding.TwoWayT.id
+        >> Binding.addLazy (=)
+        >> Binding.mapModel (fun (m: Validation.Model) -> m.Value)
+        >> Binding.mapMsg Validation.NewValue
+        >> Binding.addValidation (fun m -> m.Value |> validateInt42 |> Result.Error.toList)
+
+    let passwordBinding =
+        Binding.TwoWayT.id
+        >> Binding.addLazy (=)
+        >> Binding.mapModel (fun (m: Validation.Model) -> m.Password)
+        >> Binding.mapMsg Validation.NewPassword
+        >> Binding.addValidation (fun m -> m.Password |> validatePassword)
+
     member _.UpdateCount =
         base.Get
             ()
@@ -91,23 +104,13 @@ type ValidationViewModel(args) =
              >> Binding.mapModel (fun (m: Validation.Model) -> m.UpdateCount)
              >> Binding.addValidation Validation.errorOnEven)
 
-    member _.Value =
-        base.Get
-            ()
-            (Binding.TwoWayT.id
-             >> Binding.addLazy (=)
-             >> Binding.mapModel (fun (m: Validation.Model) -> m.Value)
-             >> Binding.mapMsg Validation.NewValue
-             >> Binding.addValidation (fun m -> m.Value |> validateInt42 |> Result.Error.toList))
+    member this.Value
+        with get () = base.Get () valueBinding
+        and set (value) = base.Set (value) valueBinding
 
-    member _.Password =
-        base.Get
-            ()
-            (Binding.TwoWayT.id
-             >> Binding.addLazy (=)
-             >> Binding.mapModel (fun (m: Validation.Model) -> m.Password)
-             >> Binding.mapMsg Validation.NewPassword
-             >> Binding.addValidation (fun m -> m.Password |> validatePassword))
+    member this.Password
+        with get () = base.Get () passwordBinding
+        and set (value) = base.Set (value) passwordBinding
 
     member _.Submit = base.Get () (Binding.CmdT.set Validation.canSubmit Validation.Submit)
 

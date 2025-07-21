@@ -85,21 +85,21 @@ type SelectionViewModel(args) =
         >> Binding.mapModel (fun (m: Selection) -> m.SelectedValue |> Option.defaultValue "")
         >> Binding.mapMsg (fun v -> SetSelectedValue(if v = "" then None else Some v))
 
-    member this.SelectedIndex 
-        with get() = base.Get() selectedIndexBinding
-        and set(value) = base.Set(value) selectedIndexBinding
+    member this.SelectedIndex
+        with get () = base.Get () selectedIndexBinding
+        and set (value) = base.Set (value) selectedIndexBinding
 
-    member _.DeselectIndex = 
+    member _.DeselectIndex =
         base.Get () (Binding.CmdT.set (fun m -> m.SelectedIndex.IsSome) (SetSelectedIndex None))
 
     member _.SelectedIndexData =
         base.Get () (Binding.OneWayT.id >> Binding.mapModel Selection.SelectedIndexData.get)
 
     member this.SelectedValue
-        with get() = base.Get() selectedValueBinding
-        and set(value) = base.Set(value) selectedValueBinding
+        with get () = base.Get () selectedValueBinding
+        and set (value) = base.Set (value) selectedValueBinding
 
-    member _.SelectedValueData = 
+    member _.SelectedValueData =
         base.Get
             ()
             (Binding.SubModelSeqUnkeyedT.id createTreeVm

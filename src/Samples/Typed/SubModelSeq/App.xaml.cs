@@ -1,19 +1,18 @@
 using System;
 using System.Windows;
 
-namespace Elmish.WPF.Samples.SubModelSeq
-{
-    public partial class App : Application
-    {
-        public App()
-        {
-            Activated += StartElmish;
-        }
+namespace Elmish.WPF.Samples.SubModelSeq;
 
-        private void StartElmish(object sender, EventArgs e)
-        {
-            Activated -= StartElmish;
-            Program.main(MainWindow);
-        }
+public partial class App : Application
+{
+    public App()
+    {
+        Activated += StartElmish;
+    }
+
+    private void StartElmish(object sender, EventArgs e)
+    {
+        Activated -= StartElmish;
+        Program.main(MainWindow);
     }
 }

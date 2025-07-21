@@ -1,12 +1,11 @@
 using System.Windows;
 
-namespace Elmish.WPF.Samples.OneWaySeq
+namespace Elmish.WPF.Samples.OneWaySeq;
+
+public partial class MainWindow : Window
 {
-    public partial class MainWindow : Window
+    public MainWindow()
     {
-        public MainWindow()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

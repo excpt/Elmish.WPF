@@ -3,7 +3,6 @@ module Elmish.WPF.Samples.Multiselect.Program
 open System
 open Serilog
 open Serilog.Extensions.Logging
-open Elmish
 open Elmish.WPF
 
 type Entity =
@@ -51,16 +50,18 @@ let rec update msg m =
 type EntityViewModel(args) =
     inherit ViewModelBase<Entity, int * bool>(args)
 
+    let isSelectedBinding =
+        Binding.TwoWayT.id
+        >> Binding.addLazy (=)
+        >> Binding.mapModel (fun e -> e.IsSelected)
+        >> Binding.mapMsgWithModel (fun isSelected e -> (e.Id, isSelected))
+
     member _.Name =
         base.Get () (Binding.OneWayT.id >> Binding.addLazy (=) >> Binding.mapModel (fun e -> e.Name))
 
-    member _.IsSelected =
-        base.Get
-            ()
-            (Binding.TwoWayT.id
-             >> Binding.addLazy (=)
-             >> Binding.mapModel (fun e -> e.IsSelected)
-             >> Binding.mapMsgWithModel (fun isSelected e -> (e.Id, isSelected)))
+    member this.IsSelected
+        with get () = base.Get () isSelectedBinding
+        and set (value) = base.Set (value) isSelectedBinding
 
     member _.SelectedLabel =
         base.Get

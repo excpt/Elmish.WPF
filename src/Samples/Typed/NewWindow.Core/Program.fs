@@ -4,7 +4,6 @@ open System
 open System.Windows
 open Serilog
 open Serilog.Extensions.Logging
-open Elmish
 open Elmish.WPF
 open AppModule
 
@@ -25,7 +24,7 @@ let main mainWindow (createWindow1: Func<#Window>) (createWindow2: Func<#Window>
         window
 
     let init () = App.init
-    
+
     let createVm args = AppViewModel(args)
 
     WpfProgram.mkSimpleT init App.update createVm

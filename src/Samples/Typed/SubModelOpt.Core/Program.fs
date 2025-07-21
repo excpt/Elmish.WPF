@@ -2,7 +2,6 @@ module Elmish.WPF.Samples.SubModelOpt.Program
 
 open Serilog
 open Serilog.Extensions.Logging
-open Elmish
 open Elmish.WPF
 
 module Form1 =
@@ -23,13 +22,15 @@ module Form1 =
 type Form1ViewModel(args) =
     inherit ViewModelBase<Form1.Model, Form1.Msg>(args)
 
-    member _.Text =
-        base.Get
-            ()
-            (Binding.TwoWayT.id
-             >> Binding.addLazy (=)
-             >> Binding.mapModel (fun (m: Form1.Model) -> m.Text)
-             >> Binding.mapMsg Form1.SetText)
+    let textBinding =
+        Binding.TwoWayT.id
+        >> Binding.addLazy (=)
+        >> Binding.mapModel (fun (m: Form1.Model) -> m.Text)
+        >> Binding.mapMsg Form1.SetText
+
+    member this.Text
+        with get () = base.Get () textBinding
+        and set (value) = base.Set (value) textBinding
 
     member _.Submit = base.Get () (Binding.CmdT.setAlways Form1.Submit)
 
@@ -53,21 +54,25 @@ module Form2 =
 type Form2ViewModel(args) =
     inherit ViewModelBase<Form2.Model, Form2.Msg>(args)
 
-    member _.Text1 =
-        base.Get
-            ()
-            (Binding.TwoWayT.id
-             >> Binding.addLazy (=)
-             >> Binding.mapModel (fun (m: Form2.Model) -> m.Text1)
-             >> Binding.mapMsg Form2.SetText1)
+    let text1Binding =
+        Binding.TwoWayT.id
+        >> Binding.addLazy (=)
+        >> Binding.mapModel (fun (m: Form2.Model) -> m.Text1)
+        >> Binding.mapMsg Form2.SetText1
 
-    member _.Text2 =
-        base.Get
-            ()
-            (Binding.TwoWayT.id
-             >> Binding.addLazy (=)
-             >> Binding.mapModel (fun (m: Form2.Model) -> m.Text2)
-             >> Binding.mapMsg Form2.SetText2)
+    let text2Binding =
+        Binding.TwoWayT.id
+        >> Binding.addLazy (=)
+        >> Binding.mapModel (fun (m: Form2.Model) -> m.Text2)
+        >> Binding.mapMsg Form2.SetText2
+
+    member this.Text1
+        with get () = base.Get () text1Binding
+        and set (value) = base.Set (value) text1Binding
+
+    member this.Text2
+        with get () = base.Get () text2Binding
+        and set (value) = base.Set (value) text2Binding
 
     member _.Submit = base.Get () (Binding.CmdT.setAlways Form2.Submit)
 

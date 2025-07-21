@@ -3,7 +3,6 @@ module Elmish.WPF.Samples.Capabilities.Program
 open System.Windows
 open Serilog
 open Serilog.Extensions.Logging
-open Elmish
 open Elmish.WPF
 open Selection
 

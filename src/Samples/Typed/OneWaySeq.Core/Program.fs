@@ -2,7 +2,6 @@ module Elmish.WPF.Samples.OneWaySeq.Program
 
 open Serilog
 open Serilog.Extensions.Logging
-open Elmish
 open Elmish.WPF
 
 type Model =
@@ -31,10 +30,7 @@ type OneWaySeqViewModel(args) =
     inherit ViewModelBase<Model, Msg>(args)
 
     member _.OneWaySeqNumbers =
-        base.Get
-            ()
-            (Binding.OneWaySeqT.id (=) id
-             >> Binding.mapModel (fun m -> m.OneWaySeqNumbers))
+        base.Get () (Binding.OneWaySeqT.id (=) id >> Binding.mapModel (fun m -> m.OneWaySeqNumbers))
 
     member _.OneWayNumbers =
         base.Get

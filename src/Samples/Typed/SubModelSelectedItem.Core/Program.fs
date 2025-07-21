@@ -3,7 +3,6 @@ module Elmish.WPF.Samples.SubModelSelectedItem.Program
 open System
 open Serilog
 open Serilog.Extensions.Logging
-open Elmish
 open Elmish.WPF
 
 type Entity = { Id: int; Name: string }
@@ -16,18 +15,31 @@ let init () =
     { Entities = [ 0..10 ] |> List.map (fun i -> { Id = i; Name = sprintf "Entity %i" i })
       Selected = Some 4 }
 
-type Msg = Select of int option
+type Msg = 
+    | Select of int option
+    | SelectRandom
 
 let update msg m =
     match msg with
     | Select entityId -> { m with Selected = entityId }
+    | SelectRandom ->
+        if m.Entities.Length > 0 then
+            let randomIndex = Random().Next(m.Entities.Length)
+            let randomEntity = m.Entities.[randomIndex]
+            { m with Selected = Some randomEntity.Id }
+        else
+            m
 
 [<AllowNullLiteral>]
 type EntityViewModel(args) =
     inherit ViewModelBase<Model * Entity, unit>(args)
 
     member _.Name =
-        base.Get () (Binding.OneWayT.id >> Binding.addLazy (=) >> Binding.mapModel (fun (_, e) -> e.Name))
+        base.Get
+            ()
+            (Binding.OneWayT.id
+             >> Binding.addLazy (=)
+             >> Binding.mapModel (fun (_, e) -> e.Name))
 
     member _.SelectedLabel =
         base.Get
@@ -42,14 +54,13 @@ type MainViewModel(args) =
 
     let createEntityVm (args: ViewModelArgs<Model * Entity, unit>) = EntityViewModel(args)
 
+    let selectedEntityBinding =
+        Binding.SubModelSelectedItem.opt "Entities"
+        >> Binding.mapModel (fun m -> m.Selected)
+        >> Binding.mapMsg Select
+
     member _.SelectRandom =
-        base.Get
-            ()
-            (Binding.CmdT.set (fun m -> m.Entities.Length > 0)
-                (fun m ->
-                    m.Entities.Item(Random().Next(m.Entities.Length)).Id
-                    |> Some
-                    |> Select))
+        base.Get () (Binding.CmdT.set (fun m -> m.Entities.Length > 0) SelectRandom)
 
     member _.Deselect = base.Get () (Binding.CmdT.setAlways (Select None))
 
@@ -57,14 +68,12 @@ type MainViewModel(args) =
         base.Get
             ()
             (Binding.SubModelSeqKeyedT.id createEntityVm (fun (_, e) -> e.Id)
-             >> Binding.mapModel (fun m -> m.Entities |> List.map (fun e -> (m, e))))
+             >> Binding.mapModel (fun m -> m.Entities |> List.map (fun e -> (m, e)))
+             >> Binding.mapMsg (fun _ -> failwith "EntityViewModel should not dispatch messages"))
 
-    member _.SelectedEntity =
-        base.Get
-            ()
-            (Binding.SubModelSelectedItem.opt "Entities"
-             >> Binding.mapModel (fun m -> m.Selected)
-             >> Binding.mapMsg Select)
+    member this.SelectedEntity
+        with get () = base.Get () selectedEntityBinding
+        and set (value) = base.Set (value) selectedEntityBinding
 
 let main window =
     let logger =

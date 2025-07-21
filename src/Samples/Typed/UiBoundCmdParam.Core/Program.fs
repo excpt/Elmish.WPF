@@ -25,23 +25,27 @@ let update msg m =
 type UiBoundCmdParamViewModel(args) =
     inherit ViewModelBase<Model, Msg>(args)
 
-    member _.Numbers =
-        base.Get () (Binding.OneWayT.id >> Binding.addLazy (=) >> Binding.mapModel (fun m -> m.Numbers))
+    let limitBinding =
+        Binding.TwoWayT.id
+        >> Binding.addLazy (=)
+        >> Binding.mapModel (fun m -> float m.EnabledMaxLimit)
+        >> Binding.mapMsg (int >> SetLimit)
 
-    member _.Limit =
+    member _.Numbers =
         base.Get
             ()
-            (Binding.TwoWayT.id
+            (Binding.OneWayT.id
              >> Binding.addLazy (=)
-             >> Binding.mapModel (fun m -> float m.EnabledMaxLimit)
-             >> Binding.mapMsg (int >> SetLimit))
+             >> Binding.mapModel (fun m -> m.Numbers))
+
+    member this.Limit
+        with get () = base.Get () limitBinding
+        and set (value) = base.Set (value) limitBinding
 
     member _.Command =
         base.Get
             ()
-            (Binding.CmdT.id 
-                true 
-                (fun (p: obj) m -> not (isNull p) && p :?> int <= m.EnabledMaxLimit)
+            (Binding.CmdT.id true (fun (p: obj) m -> not (isNull p) && p :?> int <= m.EnabledMaxLimit)
              >> Binding.mapMsg (fun _ -> Command))
 
 let designVm = UiBoundCmdParamViewModel(ViewModelArgs.simple (init ()))

@@ -96,22 +96,32 @@ let update msg m =
 type FileDialogsViewModel(args) =
     inherit ViewModelBase<Model, Msg>(args)
 
-    member _.CurrentTime =
-        base.Get () (Binding.OneWayT.id >> Binding.addLazy (=) >> Binding.mapModel (fun m -> m.CurrentTime))
+    let textBinding =
+        Binding.TwoWayT.id
+        >> Binding.addLazy (=)
+        >> Binding.mapModel (fun m -> m.Text)
+        >> Binding.mapMsg SetText
 
-    member _.Text =
+    member _.CurrentTime =
         base.Get
             ()
-            (Binding.TwoWayT.id
+            (Binding.OneWayT.id
              >> Binding.addLazy (=)
-             >> Binding.mapModel (fun m -> m.Text)
-             >> Binding.mapMsg SetText)
+             >> Binding.mapModel (fun m -> m.CurrentTime))
+
+    member this.Text
+        with get () = base.Get () textBinding
+        and set (value) = base.Set (value) textBinding
 
     member _.StatusMsg =
-        base.Get () (Binding.OneWayT.id >> Binding.addLazy (=) >> Binding.mapModel (fun m -> m.StatusMsg))
+        base.Get
+            ()
+            (Binding.OneWayT.id
+             >> Binding.addLazy (=)
+             >> Binding.mapModel (fun m -> m.StatusMsg))
 
     member _.Save = base.Get () (Binding.CmdT.setAlways RequestSave)
-    
+
     member _.Load = base.Get () (Binding.CmdT.setAlways RequestLoad)
 
 

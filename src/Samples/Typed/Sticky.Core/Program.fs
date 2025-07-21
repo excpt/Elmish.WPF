@@ -2,7 +2,6 @@ module Elmish.WPF.Samples.Sticky.Program
 
 open Serilog
 open Serilog.Extensions.Logging
-open Elmish
 open Elmish.WPF
 
 type Model = { Count: int; StepSize: int }
@@ -28,6 +27,12 @@ let update msg m =
 type StickyViewModel(args) =
     inherit ViewModelBase<Model, Msg>(args)
 
+    let stepSizeBinding =
+        Binding.TwoWayT.id
+        >> Binding.addLazy (=)
+        >> Binding.mapModel (fun (m: Model) -> float m.StepSize)
+        >> Binding.mapMsg (int >> SetStepSize)
+
     member _.CounterValue =
         base.Get
             ()
@@ -39,13 +44,9 @@ type StickyViewModel(args) =
     member _.Increment = base.Get () (Binding.CmdT.setAlways Increment)
     member _.Decrement = base.Get () (Binding.CmdT.setAlways Decrement)
 
-    member _.StepSize =
-        base.Get
-            ()
-            (Binding.TwoWayT.id
-             >> Binding.addLazy (=)
-             >> Binding.mapModel (fun (m: Model) -> float m.StepSize)
-             >> Binding.mapMsg (int >> SetStepSize))
+    member this.StepSize
+        with get () = base.Get () stepSizeBinding
+        and set (value) = base.Set (value) stepSizeBinding
 
     member _.Reset = base.Get () (Binding.CmdT.set canReset Reset)
 

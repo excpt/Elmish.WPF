@@ -35,7 +35,10 @@ module Program =
         match msg with
         | IncrementPings -> m |> Pings.map ((+) 1), [ DelayThenIncrementPings ]
         | UpdateMessage message -> m |> Message.set message, []
-        | AppendPingsToMessage -> { m with Message = m.Message + string m.Pings }, []
+        | AppendPingsToMessage ->
+            { m with
+                Message = m.Message + string m.Pings },
+            []
 
     let toCmd =
         function
@@ -47,21 +50,25 @@ module Program =
 type ThreadingViewModel(args) =
     inherit ViewModelBase<Model, Msg>(args)
 
+    let messageBinding =
+        Binding.TwoWayT.id
+        >> Binding.addLazy (=)
+        >> Binding.mapModel (fun m -> m.Message)
+        >> Binding.mapMsg UpdateMessage
+
     member _.Pings =
         base.Get () (Binding.OneWayT.id >> Binding.addLazy (=) >> Binding.mapModel (fun m -> m.Pings))
 
-    member _.Message =
-        base.Get
-            ()
-            (Binding.TwoWayT.id
-             >> Binding.addLazy (=)
-             >> Binding.mapModel (fun m -> m.Message)
-             >> Binding.mapMsg UpdateMessage)
+    member this.Message
+        with get () = base.Get () messageBinding
+        and set (value) = base.Set (value) messageBinding
 
-    member _.AppendPingsToMessage = base.Get () (Binding.CmdT.setAlways AppendPingsToMessage)
+    member _.AppendPingsToMessage =
+        base.Get () (Binding.CmdT.setAlways AppendPingsToMessage)
 
 
-let designVm = ThreadingViewModel(ViewModelArgs.simple { Pings = 2; Message = "Hello" })
+let designVm =
+    ThreadingViewModel(ViewModelArgs.simple { Pings = 2; Message = "Hello" })
 
 let main window =
 
