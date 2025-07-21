@@ -6,14 +6,20 @@ WPF done the Elmish Way
 [![NuGet version](https://img.shields.io/nuget/v/Elmish.WPF.svg)](https://www.nuget.org/packages/Elmish.WPF) [![NuGet downloads](https://img.shields.io/nuget/dt/Elmish.WPF.svg)](https://www.nuget.org/packages/Elmish.WPF) [![Build status](https://github.com/elmish/Elmish.WPF/actions/workflows/continuous_integration.yml/badge.svg)](https://github.com/elmish/Elmish.WPF/actions/workflows/continuous_integration.yml)
 
 **The good parts of MVVM (the data bindings) with the simplicity and robustness of an MVU architecture for the rest of
-your app. Never write an overly-complex ViewModel class again!**
+your app. Choose between dynamic bindings for flexibility or statically-typed ViewModels for safety and tooling support!**
 
 ### Elevator pitch
 
 Elmish.WPF is a **production-ready** library that allows you to write WPF apps with the robust, simple, well-known, and
 battle-tested MVU architecture, while still allowing you to use all your XAML knowledge and tooling to create UIs.
 
-Some benefits of MVU you’ll get with Elmish.WPF include:
+**Two powerful approaches in one library:**
+- **Dynamic Bindings**: Flexible, functional approach with runtime binding definitions
+- **Statically-Typed ViewModels**: Compile-time safety with full IntelliSense and design-time support
+
+Choose **Dynamic Bindings** for rapid prototyping, simple apps, or when you prefer functional composition. Choose **Statically-Typed ViewModels** for large applications, when working with designers, or when you want compile-time validation and superior tooling support.
+
+Some benefits of MVU you'll get with Elmish.WPF include:
 
 * Simple-to-understand, unidirectional data flow
 * Single source of truth for all the state in your app
@@ -51,7 +57,7 @@ Recommended resources
   Elmish.WPF's bindings and library functions for modifying bindings.
 * The [Elmish docs site](https://elmish.github.io/elmish) also explains the general MVU architecture and principles.
 * The [Elmish.WPF samples](https://github.com/elmish/Elmish.WPF/tree/master/src/Samples) provide many concrete usage
-  examples.
+  examples, organized into [Dynamic](https://github.com/elmish/Elmish.WPF/tree/master/src/Samples/Dynamic) and [Typed](https://github.com/elmish/Elmish.WPF/tree/master/src/Samples/Typed) approaches.
 * Blog posts:
     * [Getting Elmish in .NET with Elmish.WPF](https://medium.com/swlh/getting-elmish-in-net-with-elmish-wpf-cd44e3eddc27) ("
       getting started" guide by Matt Eland)
@@ -71,8 +77,11 @@ Recommended resources
 Getting started with Elmish.WPF
 -------------------------------
 
-See the [SingleCounter](https://github.com/elmish/Elmish.WPF/tree/master/src/Samples) sample for a very simple app. The
-central points are (assuming up-to-date VS2019):
+Elmish.WPF offers two approaches for creating bindings. Choose the one that best fits your needs:
+
+**Quick Start**: See the [Dynamic SingleCounter](https://github.com/elmish/Elmish.WPF/tree/master/src/Samples/Dynamic/SingleCounter) or [Typed SingleCounter](https://github.com/elmish/Elmish.WPF/tree/master/src/Samples/Typed/SingleCounter) samples for very simple apps demonstrating each approach.
+
+The central points are (assuming up-to-date Visual Studio):
 
 1. Create an F# Class Library. If targeting .NET 5 or .NET Core, the project file should look like this:
 
@@ -126,11 +135,15 @@ central points are (assuming up-to-date VS2019):
      | SetStepSize x -> { m with StepSize = x }
    ```
 
-6. Define the “view” function using the `Bindings` module. This is the central public API of Elmish.WPF.
+6. Define your bindings using either the **Dynamic** or **Typed** approach:
+
+### Approach A: Dynamic Bindings
+
+Define the "view" function using the `Bindings` module. This is the central public API of Elmish.WPF.
 
    Normally in Elm/Elmish this function is called `view` and would take a model and a dispatch function (to dispatch new
    messages to the update loop) and return the UI (e.g. a HTML DOM to be rendered), but in Elmish.WPF this function is
-   in general only run once and simply sets up bindings that XAML-defined views can use. Therefore, let’s call it
+   in general only run once and simply sets up bindings that XAML-defined views can use. Therefore, let's call it
    `bindings` instead of `view`.
 
    ```F#
@@ -150,45 +163,59 @@ central points are (assuming up-to-date VS2019):
    The strings identify the binding names to be used in the XAML views. The Binding module has many functions to create
    various types of bindings.
 
-Alternatively, use statically-typed view models in order to get better IDE support in the XAML.
+### Approach B: Statically-Typed ViewModels
+
+Use statically-typed view models to get better IDE support in XAML, compile-time safety, and superior design-time experience.
 
    ```f#
    open Elmish.WPF
 
+   [<AllowNullLiteral>]
    type CounterViewModel(args) =
      inherit ViewModelBase<Model, Msg>(args)
 
-     member _.CounterValue = base.Get() (Binding.OneWayT.id >> Binding.mapModel (fun m -> m.Count))
-     member _.Increment = base.Get() (Binding.CmdT.setAlways Counter.Increment)
-     member _.Decrement = base.Get() (Binding.CmdT.setAlways Counter.Decrement)
-     member _.StepSize
-       with get() = base.Get() (Binding.OneWayT.id >> Binding.mapModel (fun m -> m.StepSize))
-       and set(v) = base.Set(v) (Binding.OneWayToSourceT.id >> Binding.mapMsg Counter.Msg.SetStepSize)
+     member _.CounterValue = 
+       base.Get () (Binding.OneWayT.id >> Binding.mapModel (fun m -> m.Count))
+     
+     member _.Increment = 
+       base.Get () (Binding.CmdT.setAlways Increment)
+     
+     member _.Decrement = 
+       base.Get () (Binding.CmdT.setAlways Decrement)
+     
+     let stepSizeBinding =
+       Binding.TwoWayT.id
+       >> Binding.mapModel (fun m -> float m.StepSize)
+       >> Binding.mapMsg (int >> SetStepSize)
+
+     member this.StepSize
+       with get () = base.Get () stepSizeBinding
+       and set (value) = base.Set (value) stepSizeBinding
    ```
 
-7. Create a function that accepts the app’s main window (to be created) and configures and starts the Elmish loop for
-   the window with your `init`, `update` and `bindings`:
+7. Create a function that configures and starts the Elmish loop:
+
+### For Dynamic Bindings:
 
    ```F#
    open Elmish.WPF
 
    let main window =
-     Program.mkSimple init update bindings
-     |> Program.runElmishLoop window
+     WpfProgram.mkSimple init update bindings
+     |> WpfProgram.startElmishLoop window
    ```
 
-   Alternatively, use a statically-typed view model at the top level.
+### For Typed ViewModels:
 
    ```F#
    open Elmish.WPF
 
    let main window =
-     Program.mkSimpleT init update CounterViewModel
-     |> Program.runElmishLoop window
+     WpfProgram.mkSimpleT init update CounterViewModel
+     |> WpfProgram.startElmishLoop window
    ```
 
-   In the code above, `Program.runElmishLoop` will set the window’s `DataContext` to the specified bindings and start
-   the Elmish dispatch loop for the window.
+   In both cases, `WpfProgram.startElmishLoop` will set the window's `DataContext` and start the Elmish dispatch loop.
 
 8. Create a WPF app project (using the Visual Studio template called `WPF App (.NET)`). This will be your entry point
    and contain the XAML views. Add a reference to the F# project, and make the following changes in the `csproj` file:
@@ -243,14 +270,48 @@ Further resources:
 * The [Elmish.WPF tutorial](https://github.com/elmish/Elmish.WPF/blob/master/TUTORIAL.md) provides information on
   general MVU/Elmish concepts and how they apply to Elmish.WPF, as well as the various Elmish.WPF bindings.
 * The [samples](https://github.com/elmish/Elmish.WPF/tree/master/src/Samples) are complete, working mini-apps
-  demonstrating selected aspects of Elmish.WPF.
+  demonstrating selected aspects of Elmish.WPF. Browse the [Dynamic samples](https://github.com/elmish/Elmish.WPF/tree/master/src/Samples/Dynamic) for traditional functional bindings or the [Typed samples](https://github.com/elmish/Elmish.WPF/tree/master/src/Samples/Typed) for statically-typed ViewModels.
 * If you'd like to contribute, please read and follow
   the [Contributor guidelines](https://github.com/elmish/Elmish.WPF/blob/master/.github/CONTRIBUTING.md).
 
 FAQ
 ---
 
-#### Static views in MVU? Isn’t that just a half-baked solution that only exists due to a lack of better alternatives?
+#### Should I use Dynamic Bindings or Statically-Typed ViewModels?
+
+**Use Dynamic Bindings when:**
+- Rapid prototyping or building simple applications
+- You prefer functional composition over object-oriented patterns
+- Working alone or in small teams familiar with F#
+- You need maximum flexibility in binding definitions
+- Building MVU-style applications where the view layer should be minimal
+
+**Use Statically-Typed ViewModels when:**
+- Building large, complex applications
+- Working with designers who need design-time data and IntelliSense
+- You want compile-time validation of binding names and types
+- Integrating with existing WPF/MVVM codebases
+- Multiple developers need clear contracts between view and model layers
+- You require superior tooling support in Visual Studio
+
+Both approaches use the same underlying MVU architecture and can coexist in the same application.
+
+#### How do I migrate between Dynamic and Typed approaches?
+
+**Dynamic to Typed:**
+1. Create a class inheriting from `ViewModelBase<'model, 'msg>`
+2. Convert each binding in your `bindings()` function to a property
+3. Use `Binding.OneWayT`, `Binding.CmdT`, etc. instead of the non-T variants
+4. For TwoWay bindings, create a binding variable and implement getter/setter properties
+5. Update your program creation to use `WpfProgram.mkSimpleT`
+
+**Typed to Dynamic:**
+1. Extract all properties into a `bindings()` function returning `Binding<'model, 'msg> list`
+2. Convert property names to string-keyed bindings
+3. Use `Binding.oneWay`, `Binding.cmd`, etc. instead of the T variants
+4. Update your program creation to use `WpfProgram.mkSimple`
+
+#### Static views in MVU? Isn't that just a half-baked solution that only exists due to a lack of better alternatives?
 
 Not at all! 🙂
 
@@ -312,7 +373,7 @@ actual commands elsewhere:
   `Program.mkProgramWpfWithCmdMsg` that does this for you (but there’s no magic going on – it’s really easy to do
   yourself).
 
-The [FileDialogsCmdMsg sample](https://github.com/elmish/Elmish.WPF/tree/master/src/Samples) demonstrates this approach.
+The [FileDialogsCmdMsg sample](https://github.com/elmish/Elmish.WPF/tree/master/src/Samples/Dynamic/FileDialogsCmdMsg) demonstrates this approach.
 For more information, see
 the [Fabulous documentation](https://fsprojects.github.io/Fabulous/Fabulous.XamarinForms/update.html#replacing-commands-with-command-messages-for-better-testability).
 For reference, here
@@ -396,14 +457,14 @@ issues with using `Window` as the type).
 Sure! Just use `Binding.subModelWin`. It works like `Binding.subModel`, but has a `WindowState` wrapper around the
 returned model to control whether the window is closed, hidden, or visible. You can use both modal and non-modal
 windows/dialogs, and everything is a part of the Elmish core loop. Check out
-the [NewWindow sample](https://github.com/elmish/Elmish.WPF/tree/master/src/Samples).
+the [NewWindow sample](https://github.com/elmish/Elmish.WPF/tree/master/src/Samples/Dynamic/NewWindow) ([Dynamic](https://github.com/elmish/Elmish.WPF/tree/master/src/Samples/Dynamic/NewWindow) | [Typed](https://github.com/elmish/Elmish.WPF/tree/master/src/Samples/Typed/NewWindow)).
 
 Note that if you use `App.xaml` startup, you may want to set `ShutdownMode="OnMainWindowClose"` in `App.xaml` if that’s
 the desired behavior.
 
 #### Can I bind to events and use behaviors?
 
-Sure! Check out the [EventBindingsAndBehaviors sample](https://github.com/elmish/Elmish.WPF/tree/master/src/Samples).
+Sure! Check out the [EventBindingsAndBehaviors sample](https://github.com/elmish/Elmish.WPF/tree/master/src/Samples/Dynamic/EventBindingsAndBehaviors) ([Dynamic](https://github.com/elmish/Elmish.WPF/tree/master/src/Samples/Dynamic/EventBindingsAndBehaviors) | [Typed](https://github.com/elmish/Elmish.WPF/tree/master/src/Samples/Typed/EventBindingsAndBehaviors)).
 Note that you have to install the NuGet package `Microsoft.Xaml.Behaviors.Wpf`.
 
 #### How can I control logging?
