@@ -90,11 +90,8 @@ type Window2ViewModel(args) =
             (Binding.OneWayT.id
              >> Binding.mapModel (fun m -> m.ConfirmState = Some ConfirmState.Close |> Bool.toVisibilityCollapsed))
 
-    member _.Submit =
-        base.Get () (Binding.CmdT.setAlways (InOut.In Submit))
+    member _.Submit = base.Get () (Binding.CmdT.setAlways (InOut.In Submit))
 
-    member _.Cancel =
-        base.Get () (Binding.CmdT.setAlways (InOut.In Cancel))
+    member _.Cancel = base.Get () (Binding.CmdT.setAlways (InOut.In Cancel))
 
-    member _.Close =
-        base.Get () (Binding.CmdT.setAlways (InOut.In Close))
+    member _.Close = base.Get () (Binding.CmdT.setAlways (InOut.In Close))

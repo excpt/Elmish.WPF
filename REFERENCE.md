@@ -69,7 +69,8 @@ debouncing/throttling etc.
 
 ### One-way bindings
 
-*Relevant sample: SingleCounter - ([Dynamic](src/Samples/Dynamic/SingleCounter) | [Typed](src/Samples/Typed/SingleCounter))*
+*Relevant sample:
+SingleCounter - ([Dynamic](src/Samples/Dynamic/SingleCounter) | [Typed](src/Samples/Typed/SingleCounter))*
 
 One-way bindings are used when you want to bind to a simple value.
 
@@ -98,7 +99,8 @@ the inner value.
 
 ### Two-way bindings
 
-*Relevant sample: SingleCounter - ([Dynamic](src/Samples/Dynamic/SingleCounter) | [Typed](src/Samples/Typed/SingleCounter))*
+*Relevant sample:
+SingleCounter - ([Dynamic](src/Samples/Dynamic/SingleCounter) | [Typed](src/Samples/Typed/SingleCounter))*
 
 Two-way bindings are commonly used for any kind of input (textboxes, checkboxes, sliders, etc.). The two-way bindings
 accept two functions: A function `get: 'model -> 'a` just like the one-way binding, and a function
@@ -169,7 +171,8 @@ There are also variants of the two-way validating bindings for option-wrapped va
 
 ### Command bindings
 
-*Relevant sample: SingleCounter - ([Dynamic](src/Samples/Dynamic/SingleCounter) | [Typed](src/Samples/Typed/SingleCounter))*
+*Relevant sample:
+SingleCounter - ([Dynamic](src/Samples/Dynamic/SingleCounter) | [Typed](src/Samples/Typed/SingleCounter))*
 
 Command bindings are used whenever you use `Command`/`CommandParameter` in XAML, such as for button clicks.
 
@@ -200,7 +203,8 @@ model-accepting function). The above can therefore be written like this:
 
 #### Conditional commands (where you control `CanExecute`)
 
-*Relevant sample: SingleCounter - ([Dynamic](src/Samples/Dynamic/SingleCounter) | [Typed](src/Samples/Typed/SingleCounter))*
+*Relevant sample:
+SingleCounter - ([Dynamic](src/Samples/Dynamic/SingleCounter) | [Typed](src/Samples/Typed/SingleCounter))*
 
 A command may not always be executable. As you might know, WPF’s `ICommand` interface contains a `CanExecute` method
 that, if `false`, will cause WPF to disable the bound control (e.g. the button).
@@ -225,7 +229,8 @@ There are several ways to indicate that a command can‘t execute. The `cmdIf` b
 
 #### Using the `CommandParameter`
 
-*Relevant sample: UiBoundCmdParam - ([Dynamic](src/Samples/Dynamic/UiBoundCmdParam) | [Typed](src/Samples/Typed/UiBoundCmdParam))*
+*Relevant sample:
+UiBoundCmdParam - ([Dynamic](src/Samples/Dynamic/UiBoundCmdParam) | [Typed](src/Samples/Typed/UiBoundCmdParam))*
 
 There may be times you need to use the XAML `CommandParameter` property. You then need to use Elmish.WPF’s `cmdParam`
 binding, which works exactly like `cmd` but where `exec` function accepts the command parameter as its first parameter.
@@ -446,7 +451,8 @@ There are two special bindings not yet covered.
 
 #### `subModelSelectedItem`
 
-*Relevant sample: SubModelSelectedItem - ([Dynamic](src/Samples/Dynamic/SubModelSelectedItem) | [Typed](src/Samples/Typed/SubModelSelectedItem))*
+*Relevant sample:
+SubModelSelectedItem - ([Dynamic](src/Samples/Dynamic/SubModelSelectedItem) | [Typed](src/Samples/Typed/SubModelSelectedItem))*
 
 The section on model normalization made it clear that it’s better to use IDs than complex objects in messages. This
 means that for bindings to the selected value of a `ListBox` or similar, you’ll likely have better luck using
@@ -615,27 +621,28 @@ that
 Choosing Your Binding Approach
 ------------------------------
 
-Elmish.WPF offers two approaches for creating bindings between your F# model and WPF views. Understanding when to use each approach will help you make the best choice for your application.
+Elmish.WPF offers two approaches for creating bindings between your F# model and WPF views. Understanding when to use
+each approach will help you make the best choice for your application.
 
 ### Dynamic Bindings vs Statically-Typed ViewModels
 
-| Aspect | Dynamic Bindings | Statically-Typed ViewModels |
-|--------|------------------|----------------------------|
-| **Syntax** | Functional, list-based | Object-oriented, property-based |
-| **Type Safety** | Runtime binding resolution | Compile-time binding validation |
-| **XAML Support** | Basic IntelliSense | Full IntelliSense and auto-completion |
-| **Design-time** | Limited design-time support | Rich design-time experience |
-| **Performance** | Good | Slightly better (direct property access) |
-| **Flexibility** | Very flexible, dynamic composition | More structured, explicit definitions |
-| **Learning Curve** | Familiar to functional programmers | Familiar to WPF/C# developers |
-| **Refactoring** | Manual updates needed | Automatic refactoring support |
+| Aspect             | Dynamic Bindings                   | Statically-Typed ViewModels              |
+|--------------------|------------------------------------|------------------------------------------|
+| **Syntax**         | Functional, list-based             | Object-oriented, property-based          |
+| **Type Safety**    | Runtime binding resolution         | Compile-time binding validation          |
+| **XAML Support**   | Basic IntelliSense                 | Full IntelliSense and auto-completion    |
+| **Design-time**    | Limited design-time support        | Rich design-time experience              |
+| **Performance**    | Good                               | Slightly better (direct property access) |
+| **Flexibility**    | Very flexible, dynamic composition | More structured, explicit definitions    |
+| **Learning Curve** | Familiar to functional programmers | Familiar to WPF/C# developers            |
+| **Refactoring**    | Manual updates needed              | Automatic refactoring support            |
 
 ### When to Choose Dynamic Bindings
 
 Choose **dynamic bindings** when:
 
 - **Rapid prototyping**: Quick iteration and experimentation
-- **Simple applications**: Small apps with few UI interactions  
+- **Simple applications**: Small apps with few UI interactions
 - **Functional preference**: You prefer functional composition over OOP
 - **Dynamic scenarios**: Bindings need to be created or modified at runtime
 - **MVU purists**: You want minimal view layer complexity
@@ -671,7 +678,7 @@ Both approaches use the same underlying MVU architecture, making migration strai
    ```F#
    // From: "CounterValue" |> Binding.oneWay (fun m -> m.Count)
    // To:
-   member _.CounterValue = 
+   member _.CounterValue =
        base.Get () (Binding.OneWayT.id >> Binding.mapModel (fun m -> m.Count))
    ```
 
@@ -683,7 +690,7 @@ Both approaches use the same underlying MVU architecture, making migration strai
        Binding.TwoWayT.id
        >> Binding.mapModel (fun m -> float m.StepSize)
        >> Binding.mapMsg (int >> SetStepSize)
-   
+
    member this.StepSize
        with get () = base.Get () stepSizeBinding
        and set (value) = base.Set (value) stepSizeBinding
@@ -707,13 +714,14 @@ Both approaches use the same underlying MVU architecture, making migration strai
 
 2. **Update program creation**:
    ```F#
-   // From: WpfProgram.mkSimpleT init update MyViewModel  
+   // From: WpfProgram.mkSimpleT init update MyViewModel
    // To:   WpfProgram.mkSimple init update bindings
    ```
 
 ### Mixed Approach
 
 You can use both approaches within the same application:
+
 - Use dynamic bindings for simple, frequently-changing views
 - Use typed ViewModels for complex, stable views
 - Convert between approaches as requirements evolve
@@ -762,18 +770,18 @@ A typical typed ViewModel follows this pattern:
 [<AllowNullLiteral>]
 type MyViewModel(args) =
     inherit ViewModelBase<Model, Msg>(args)
-    
+
     // Default constructor for design-time support
     new() = MyViewModel(initialModel |> ViewModelArgs.simple)
-    
+
     // OneWay properties
-    member _.SomeValue = 
+    member _.SomeValue =
         base.Get () (Binding.OneWayT.id >> Binding.mapModel (fun m -> m.SomeValue))
-    
-    // Command properties  
-    member _.SomeCommand = 
+
+    // Command properties
+    member _.SomeCommand =
         base.Get () (Binding.CmdT.setAlways SomeMessage)
-    
+
     // TwoWay properties (see detailed examples below)
 ```
 
@@ -795,49 +803,52 @@ Example usage:
 
 ```F#
 // Simple one-way binding
-member _.CounterValue = 
+member _.CounterValue =
     base.Get () (Binding.OneWayT.id >> Binding.mapModel (fun m -> m.Count))
 
 // One-way binding with lazy evaluation
-member _.ExpensiveCalculation = 
-    base.Get () (Binding.OneWayT.id 
-                >> Binding.addLazy (=) 
+member _.ExpensiveCalculation =
+    base.Get () (Binding.OneWayT.id
+                >> Binding.addLazy (=)
                 >> Binding.mapModel calculateExpensiveValue)
 
 // Command binding
-member _.IncrementCommand = 
+member _.IncrementCommand =
     base.Get () (Binding.CmdT.setAlways Increment)
 
 // Conditional command binding
-member _.ResetCommand = 
+member _.ResetCommand =
     base.Get () (Binding.CmdT.set (fun m -> m.Count <> 0) Reset)
 ```
 
 #### Typed TwoWay Bindings
 
-TwoWay bindings in typed ViewModels require a specific pattern with getter and setter properties. This is crucial for proper WPF data binding:
+TwoWay bindings in typed ViewModels require a specific pattern with getter and setter properties. This is crucial for
+proper WPF data binding:
 
 ```F#
 [<AllowNullLiteral>]
 type CounterViewModel(args) =
     inherit ViewModelBase<Model, Msg>(args)
-    
+
     // Define the binding pipeline as a let-bound value
     let stepSizeBinding =
         Binding.TwoWayT.id
         >> Binding.addLazy (=)
         >> Binding.mapModel (fun m -> float m.StepSize)  // Convert from model type
         >> Binding.mapMsg (int >> SetStepSize)           // Convert to message type
-    
+
     // Implement property with explicit getter and setter
     member this.StepSize
         with get () = base.Get () stepSizeBinding
         and set (value) = base.Set (value) stepSizeBinding
 ```
 
-**Important**: The binding variable (`stepSizeBinding`) must be defined as a `let` binding inside the class, and both `get()` and `set()` must be implemented for TwoWay bindings to work correctly.
+**Important**: The binding variable (`stepSizeBinding`) must be defined as a `let` binding inside the class, and both
+`get()` and `set()` must be implemented for TwoWay bindings to work correctly.
 
-**Type Conversion**: Notice how we convert between model types (`int`) and WPF types (`float`) in the binding pipeline. This is common when binding to controls like `Slider` that use `float` values.
+**Type Conversion**: Notice how we convert between model types (`int`) and WPF types (`float`) in the binding pipeline.
+This is common when binding to controls like `Slider` that use `float` values.
 
 #### Typed TwoWay Bindings with Validation
 
@@ -849,7 +860,7 @@ let emailBinding =
     >> Binding.addLazy (=)
     >> Binding.mapModel (fun m -> m.Email)
     >> Binding.mapMsg SetEmail
-    >> Binding.addValidation (fun m -> 
+    >> Binding.addValidation (fun m ->
         if String.IsNullOrEmpty(m.Email) then ["Email is required"]
         elif not (m.Email.Contains("@")) then ["Invalid email format"]
         else [])
@@ -866,7 +877,7 @@ You can create strongly-typed SubModels in much the same way as you can create n
 takes in that `args` parameter, and use one of the following functions to create the binding:
 
 - `Binding.SubModelT.req` - Required sub-model
-- `Binding.SubModelT.opt` - Optional sub-model  
+- `Binding.SubModelT.opt` - Optional sub-model
 - `Binding.SubModelSeqUnkeyedT.id` - Collection without keys
 - `Binding.SubModelSeqKeyedT.id` - Collection with keys for efficient updates
 - `Binding.SubModelWinT.id` - Sub-model controlling window state
@@ -878,21 +889,21 @@ Example of typed sub-model binding:
 [<AllowNullLiteral>]
 type CounterViewModel(args) =
     inherit ViewModelBase<Counter.Model, Counter.Msg>(args)
-    
-    member _.Count = 
+
+    member _.Count =
         base.Get () (Binding.OneWayT.id >> Binding.mapModel (fun m -> m.Count))
-    
-    member _.Increment = 
+
+    member _.Increment =
         base.Get () (Binding.CmdT.setAlways Counter.Increment)
 
 // Parent ViewModel
-[<AllowNullLiteral>]  
+[<AllowNullLiteral>]
 type MainViewModel(args) =
     inherit ViewModelBase<App.Model, App.Msg>(args)
-    
-    member _.Counter = 
+
+    member _.Counter =
         base.Get () (Binding.SubModelT.req CounterViewModel
-                    >> Binding.mapModel (fun m -> m.Counter)  
+                    >> Binding.mapModel (fun m -> m.Counter)
                     >> Binding.mapMsg App.CounterMsg)
 ```
 
@@ -904,8 +915,8 @@ For collections of sub-models, use `SubModelSeqKeyedT.id`:
 [<AllowNullLiteral>]
 type CounterListViewModel(args) =
     inherit ViewModelBase<CounterList.Model, CounterList.Msg>(args)
-    
-    member _.Counters = 
+
+    member _.Counters =
         base.Get () (Binding.SubModelSeqKeyedT.id CounterViewModel (fun m -> m.Id)
                     >> Binding.mapModel (fun m -> m.Counters)
                     >> Binding.mapMsg (fun (id, msg) -> CounterMsg(id, msg)))

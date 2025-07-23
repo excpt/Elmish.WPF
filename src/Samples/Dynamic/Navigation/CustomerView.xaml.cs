@@ -1,12 +1,11 @@
 ﻿using System.Windows.Controls;
 
-namespace Navigation
+namespace Navigation;
+
+public partial class CustomerView : UserControl
 {
-    public partial class CustomerView : UserControl
+    public CustomerView()
     {
-        public CustomerView()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

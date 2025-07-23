@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Windows;
+using Elmish.WPF.Samples.Navigation;
 
-namespace Navigation
+namespace Navigation;
+
+public partial class App : Application
 {
-    public partial class App : Application
+    public App()
     {
-        public App()
-        {
-            Activated += StartElmish;
-        }
+        Activated += StartElmish;
+    }
 
-        private void StartElmish(object sender, EventArgs e)
-        {
-            Activated -= StartElmish;
-            Elmish.WPF.Samples.Navigation.Program.main(MainWindow);
-        }
+    private void StartElmish(object sender, EventArgs e)
+    {
+        Activated -= StartElmish;
+        Program.main(MainWindow);
     }
 }

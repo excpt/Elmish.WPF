@@ -15,7 +15,7 @@ let init () =
     { Entities = [ 0..10 ] |> List.map (fun i -> { Id = i; Name = sprintf "Entity %i" i })
       Selected = Some 4 }
 
-type Msg = 
+type Msg =
     | Select of int option
     | SelectRandom
 
@@ -26,7 +26,9 @@ let update msg m =
         if m.Entities.Length > 0 then
             let randomIndex = Random().Next(m.Entities.Length)
             let randomEntity = m.Entities.[randomIndex]
-            { m with Selected = Some randomEntity.Id }
+
+            { m with
+                Selected = Some randomEntity.Id }
         else
             m
 

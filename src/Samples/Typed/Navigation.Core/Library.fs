@@ -86,14 +86,18 @@ module Main =
             match model.ActivePage with
             | Customer custModel ->
                 let updatedCustModel, cmd = Customer.update msg custModel
-                { model with ActivePage = Customer updatedCustModel },
+
+                { model with
+                    ActivePage = Customer updatedCustModel },
                 Cmd.map CustomerMessage cmd
             | _ -> model, Cmd.none
         | DashboardMessage msg ->
             match model.ActivePage with
             | Dashboard dashModel ->
                 let updatedDashModel, cmd = Dashboard.update msg dashModel
-                { model with ActivePage = Dashboard updatedDashModel },
+
+                { model with
+                    ActivePage = Dashboard updatedDashModel },
                 Cmd.map DashboardMessage cmd
             | _ -> model, Cmd.none
         | Navigate p ->
@@ -108,7 +112,7 @@ module Main =
                 Cmd.none
             | _ -> System.ArgumentOutOfRangeException() |> raise
 
-type MainViewModel(args) as this =
+type MainViewModel(args) =
     inherit ViewModelBase<Main.Model, Main.Message>(args)
 
     member this.Title = base.Get () (Binding.OneWayT.id >> Binding.mapModel _.Title)

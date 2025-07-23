@@ -35,7 +35,8 @@
   <StackPanel HorizontalAlignment="Center" Margin="0,25,0,0">
     <StackPanel Orientation="Horizontal">
       <TextBlock Text="Update count:         " />
-      <TextBox IsEnabled="false" Style="{StaticResource textBoxInError}" Text="{Binding UpdateCount, Mode=OneWay}" Width="200"
+      <TextBox IsEnabled="false" Style="{StaticResource textBoxInError}" Text="{Binding UpdateCount, Mode=OneWay}"
+               Width="200"
                Margin="0,5,0,25" />
     </StackPanel>
     <StackPanel Orientation="Horizontal">

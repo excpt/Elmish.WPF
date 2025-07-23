@@ -1,12 +1,11 @@
 ﻿using System.Windows;
 
-namespace Navigation
+namespace Navigation;
+
+public partial class MainWindow : Window
 {
-    public partial class MainWindow : Window
+    public MainWindow()
     {
-        public MainWindow()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

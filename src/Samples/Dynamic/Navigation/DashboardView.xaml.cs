@@ -1,12 +1,11 @@
 ﻿using System.Windows.Controls;
 
-namespace Navigation
+namespace Navigation;
+
+public partial class DashboardView : UserControl
 {
-    public partial class DashboardView : UserControl
+    public DashboardView()
     {
-        public DashboardView()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

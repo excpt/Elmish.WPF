@@ -11,8 +11,7 @@
         mc:Ignorable="d"
         d:DataContext="{x:Static vm:AppModule.designVm}">
   <Window.Resources>
-    <ResourceDictionary>
-    </ResourceDictionary>
+    <ResourceDictionary />
   </Window.Resources>
   <StackPanel VerticalAlignment="Center">
     <TextBlock HorizontalAlignment="Center" FontWeight="Bold">Window 1</TextBlock>
