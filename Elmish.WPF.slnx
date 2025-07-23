@@ -23,6 +23,8 @@
     <Project Path="src/Samples/Dynamic/FileDialogsCmdMsg/FileDialogsCmdMsg.csproj" />
     <Project Path="src/Samples/Dynamic/Multiselect.Core/Multiselect.Core.fsproj" />
     <Project Path="src/Samples/Dynamic/Multiselect/Multiselect.csproj" />
+    <Project Path="src/Samples/Dynamic/Navigation.Core/Navigation.Core.fsproj" />
+    <Project Path="src/Samples/Dynamic/Navigation/Navigation.csproj" />
     <Project Path="src/Samples/Dynamic/NewWindow.Core/NewWindow.Core.fsproj" />
     <Project Path="src/Samples/Dynamic/NewWindow/NewWindow.csproj" />
     <Project Path="src/Samples/Dynamic/OneWaySeq.Core/OneWaySeq.Core.fsproj" />
