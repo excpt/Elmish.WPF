@@ -57,6 +57,8 @@
     <Project Path="src/Samples/Typed/FileDialogsCmdMsg/FileDialogsCmdMsg.csproj" />
     <Project Path="src/Samples/Typed/Multiselect.Core/Multiselect.Core.fsproj" />
     <Project Path="src/Samples/Typed/Multiselect/Multiselect.csproj" />
+    <Project Path="src/Samples/Typed/Navigation.Core/Navigation.Core.fsproj" />
+    <Project Path="src/Samples/Typed/Navigation/Navigation.csproj" />
     <Project Path="src/Samples/Typed/NewWindow.Core/NewWindow.Core.fsproj" />
     <Project Path="src/Samples/Typed/NewWindow/NewWindow.csproj" />
     <Project Path="src/Samples/Typed/OneWaySeq.Core/OneWaySeq.Core.fsproj" />
